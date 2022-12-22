@@ -1,0 +1,74 @@
+body,
+html {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  height: 100%;
+  margin: 0;
+}
+.container {
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.main-content {
+  flex: 4;
+  padding: 20px;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-wrap: anywhere;
+
+}
+
+.computer-cards {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  /* dodane */
+}
+
+.computer-card {
+  width: 90%;
+  padding: 20px;
+  margin: 20px auto;
+  display: flex;
+  background: #f2f2f2;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 0 20px 8px #d0d0d0;
+  display: flex;
+  /*cursor: pointer;*/
+
+  align-items: center;
+  flex-wrap: wrap;
+}
+.computer-card .info {
+  flex: 0 0 66.666666%;
+}
+.computer-card .options {
+  flex: 0 0 33.333333%;
+}
+
+.computer-card button {
+  font-size: 16px;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  background-color: transparent;
+
+  cursor: pointer;
+  float: right;
+}
+
+.computer-card button:hover {
+  background-color: #d0d0d0;
+}
+
+.computer-card i {
+  padding: 8px 12px;
+}
+i {
+  z-index: -1;
+}
