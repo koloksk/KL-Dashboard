@@ -4,7 +4,6 @@ const socketio = require("socket.io");
 const fs = require("fs");
 const app = express();
 const render = require("./js/views.js");
-const { Socket } = require("dgram");
 
 const server = app.listen(3000, function () {
   console.log("App listening on port 3000!");
@@ -110,7 +109,10 @@ io.on("connection", (socket) => {
     io.emit("commandResult", { id: socket.id, response: decodedString });
     //fs.writeFileSync("test.txt", decodedString);
   });
-
+  socket.on("delete", async (msg) => {
+    fs.rmSync(`./clients/${msg.clientname}`, { recursive: true, force: true });
+    offlineclients.splice(offlineclients.indexOf(msg.clientname), 1);
+  });
   socket.on("disconnect", () => {
     console.log("Wyszedl: " + socket.name + " " + socket.ip);
     if (socket.name != null) {
@@ -144,21 +146,13 @@ const removeById = (arr, id) => {
   }
   return !!arr.splice(requiredIndex, 1);
 };
-const existInArray = (arr, id) => {
-  const requiredIndex = arr.findIndex((el) => {
-    return el.name === String(id);
-  });
-  if (requiredIndex === -1) {
-    return false;
-  }
-  return true;
-};
+
 function getOfflineClients() {
   offlineclients.length = 0;
 
   fs.readdirSync("./clients").forEach((file) => {
     offlineclients.push(file);
-    console.log(file);
+    //console.log(file);
   });
   return null;
 }

@@ -16,72 +16,19 @@
 
   <body>
     <div class="container">
-      <%- include('sidebar') %>
+      <%- include('./models/sidebar') %>
       <div class="main-content">
         <h1>Dashboard</h1>
         <div class="computer-cards">
-          <% for(let i = 0; i < clients.length; i++){ %>
-          <div class="computer-card" clientname="<%= clients[i].name%>">
-            <div class="info">
-              <i
-                class="fas fa-circle"
-                title="Status Online &#10; ip: <%= clients[i].ip%> &#10; wersja: <%= clients[i].version%>"
-                style="color: green"
-              ></i>
-              <a><%= clients[i].name%></a>
+          <!-- Online Clients -->
 
-              <i class="fas fa-hdd"></i> 64/500 GB
-              <i class="fab fa-windows"></i> Windows 10 64bit
-            </div>
-            <div class="options">
-              <button
-                data-status="true"
-                class="shutdown-button"
-                style="color: red"
-              >
-                <i class="fas fa-power-off" id="<%= clients[i].id%>"></i>Wylacz
-              </button>
-              <button
-                class="console-button"              >
-                <i class="fas fa-terminal"></i>Konsola
-              </button>
-              <button class="log-button" id="<%= clients[i].id%>">
-                <i style="color: gold" class="fas fa-file"></i>Logi
-              </button>
-            </div>
-            <div id="<%= clients[i].id%>" class="console" style="display: none">
-              <div id="header">
-                <span>$></span>
-                <input type="text" id="input" />
-              </div>
-              <div id="output"></div>
-            </div>
-          </div>
+          <% for(let i = 0; i < clients.length; i++){ %>
+            <%- include('./models/computercard',{id: clients[i].id, clientname: clients[i].name, ip: clients[i].ip,version: clients[i].version}) %>
           <% } %>
 
           <!-- Offline Clients -->
           <% for(let i = 0; i < offlineclients.length; i++){ %>
-
-          <div class="computer-card" clientname="<%= offlineclients[i]%>">
-            <div class="info">
-              <i class="fas fa-circle" style="color: gray"></i>
-              <a><%= offlineclients[i]%></a>
-            </div>
-            
-            <div class="options">
-              <button
-              data-status="true"
-              class="delete-button"
-              style="color: red"
-            >
-              <i class="fas fa-trash"></i>Usun
-            </button>
-              <button class="log-button">
-                <i style="color: gold" class="fas fa-file"></i>Logi
-              </button>
-
-            </div>
-          </div>
+            <%- include('./models/offlinecomputercard',{clientname: offlineclients[i]}) %>
           <% } %>
         </div>
       </div>
@@ -89,27 +36,5 @@
     <script src="/js/dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
     <script src="/js/console.js"></script>
-
-    <script>
-      //let socket = io();
-      const shutdownbuttons = document.querySelectorAll(".shutdown-button");
-      const logbuttons = document.querySelectorAll(".log-button");
-
-      shutdownbuttons.forEach((button) => {
-        button.addEventListener("click", (e) => {
-          socket.emit("command", {
-            id: e.target.id,
-            cmd: "shutdown /i /t 120",
-          });
-        });
-      });
-      logbuttons.forEach((button) => {
-        button.addEventListener("click", async (e) => {
-          const clientname = button.closest(".computer-card").getAttribute("clientname"); //get button computer card
-
-          window.location.href = `/log?clientname=${clientname}`;
-        });
-      });
-    </script>
   </body>
 </html>

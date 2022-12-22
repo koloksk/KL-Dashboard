@@ -1,0 +1,35 @@
+<div class="computer-card" clientname="<%= clientname%>">
+    <div class="info">
+      <i
+        class="fas fa-circle"
+        title="Status Online &#10; ip: <%= ip%> &#10; wersja: <%= version%>"
+        style="color: green"
+      ></i>
+      <a><%= clientname%></a>
+
+      <i class="fas fa-hdd"></i> 64/500 GB
+      <i class="fab fa-windows"></i> Windows 10 64bit
+    </div>
+    <div class="options">
+      <button
+        class="shutdown-button"
+        style="color: red"
+      >
+        <i class="fas fa-power-off" id="<%= id%>"></i>Wylacz
+      </button>
+      <button
+        class="console-button"              >
+        <i class="fas fa-terminal"></i>Konsola
+      </button>
+      <button class="log-button" id="<%= id%>">
+        <i style="color: gold" class="fas fa-file"></i>Logi
+      </button>
+    </div>
+    <div id="<%= id%>" class="console" style="display: none">
+      <div id="header">
+        <span>$></span>
+        <input type="text" id="input" />
+      </div>
+      <div id="output"></div>
+    </div>
+  </div>
