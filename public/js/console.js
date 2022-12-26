@@ -9,9 +9,9 @@
   inputs.forEach(input => {
     input.addEventListener("keyup", (e) => {
       if (e.key === "Enter") {
-        
-        const consoleElement = input.closest(".console");
-        const output = consoleElement.querySelector("#output");
+
+        const computercardElement = input.closest(".computer-card");
+        const output = computercardElement.querySelector("#output");
         output.scrollTop = output.scrollHeight; // auto scroll to bottom
         
         //const output = input.querySelector("#output");
@@ -20,7 +20,7 @@
         const command = input.value;
         
         socket.emit("command", {
-          id: consoleElement.id,
+          id: computercardElement.id,
           cmd: command,
         });
 
@@ -33,9 +33,9 @@
   
   socket.on('commandResult', (data) => {
     //console.log(data.response);
-    const consoleElement = document.querySelector(`.console#${data.id}`); // get console element with socket id
-    //console.log(consoleElement);
-    const output = consoleElement.querySelector("#output"); // get output in console element
+    const computercardElement = document.querySelector(`.computer-card#${data.id}`); // get console element with socket id
+    console.log(computercardElement);
+    const output = computercardElement.querySelector("#output"); // get output in console element
 
     output.innerText += `${data.response}\n`; //print response
     output.scrollTop = output.scrollHeight; // auto scroll to bottom

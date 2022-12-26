@@ -1,4 +1,4 @@
-<div class="computer-card" clientname="<%= clientname%>">
+<div class="computer-card" clientname="<%= clientname%>" id="<%= id%>">
     <div class="info">
       <i
         class="fas fa-circle"
@@ -15,17 +15,20 @@
         class="shutdown-button"
         style="color: red"
       >
-        <i class="fas fa-power-off" id="<%= id%>"></i>Wylacz
+        <i class="fas fa-power-off" ></i>Wylacz
       </button>
       <button
         class="console-button"              >
         <i class="fas fa-terminal"></i>Konsola
       </button>
-      <button class="log-button" id="<%= id%>">
+      <button class="log-button">
         <i style="color: gold" class="fas fa-file"></i>Logi
       </button>
+      <button class="screenshot-button">
+        <i style="color: green" class="fas fa-camera"></i>SS
+      </button>
     </div>
-    <div id="<%= id%>" class="console" style="display: none">
+    <div class="console" style="display: none">
       <div id="header">
         <span>$></span>
         <input type="text" id="input" />

