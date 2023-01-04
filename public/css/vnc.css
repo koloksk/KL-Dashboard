@@ -1,0 +1,13 @@
+html {
+    background-color: black;
+}
+.view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 95vh;
+}
+#c {
+    max-width: 100%;
+    max-height: 100%;
+}

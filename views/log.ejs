@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Test File</title>
+    <title>Logi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
+
   <body>
-    <h1>Contents of test.txt</h1>
-    <p><%= content %></p>
+    <h1><%= clientname %></h1>
+    <% if(type == null){ for(let i = 0; i < content.length; i++){ if(dirname != null){%>
+    <a href="/logs/<%= clientname %>/<%= dirname %>/<%= content[i] %>"
+      ><%= content[i] %></a
+    >
+    <% }else{%>
+    <a href="/logs/<%= clientname %>/<%= content[i] %>"><%= content[i] %></a>
+
+    <%}}} else if (type == "jpg"){ %>
+    <img src="data:image/png;base64,<%= content %>" alt="" srcset="" width="100%" height="100%" />
+
+    <%} else if (type == "txt"){%> <%= content %> <%}%>
   </body>
 </html>

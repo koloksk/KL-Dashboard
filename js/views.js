@@ -17,9 +17,7 @@ exports.dashboard = (req, res) => {
     });
   } else res.render("index");
 };
-exports.console = (req, res) => {
-  res.render("console");
-};
+
 exports.errorHandler = (req, res) => {
   res.redirect("/");
 };

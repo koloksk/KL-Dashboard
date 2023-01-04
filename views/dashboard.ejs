@@ -23,7 +23,7 @@
           <!-- Online Clients -->
 
           <% for(let i = 0; i < clients.length; i++){ %>
-            <%- include('./models/computercard',{id: clients[i].id, clientname: clients[i].name, ip: clients[i].ip,version: clients[i].version}) %>
+            <%- include('./models/computercard',{id: clients[i].id, clientname: clients[i].name, ip: clients[i].ip,version: clients[i].version,system: clients[i].system}) %>
           <% } %>
 
           <!-- Offline Clients -->

