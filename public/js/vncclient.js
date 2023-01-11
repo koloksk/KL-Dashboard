@@ -82,23 +82,23 @@ function requestFullScreen(element) {
 
     if (exitMethod) { // Native full screen.
       closeFullscreen()
-    } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+  } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
       var wscript = new ActiveXObject("WScript.Shell");
       if (wscript !== null) {
-        wscript.SendKeys("{F11}");
+          wscript.SendKeys("{F11}");
       }
-    }
-
-  } else {
-    if (requestMethod) { // Native full screen.
-      requestMethod.call(element);
-    } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
-      var wscript = new ActiveXObject("WScript.Shell");
-      if (wscript !== null) {
-        wscript.SendKeys("{F11}");
-      }
-    }
   }
+
+} else{
+  if (requestMethod) { // Native full screen.
+      requestMethod.call(element);
+  } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+      var wscript = new ActiveXObject("WScript.Shell");
+      if (wscript !== null) {
+          wscript.SendKeys("{F11}");
+      }
+  }
+}
 }
 
 function closeFullscreen() {
@@ -131,17 +131,26 @@ document
     });
   });
 
+// setInterval(() => {
+//   socket.emit("command", {
+//     id: document.getElementById("id").getAttribute("data-id"),
+//     cmd: "screenshot",
+//   });
+// }, 250);
 
 socket.emit("command", {
   id: c.id,
   cmd: "live",
 });
-
 let fps = 0;
 var ctx = c.getContext("2d");
 ctx.canvas.width = window.innerWidth;
 ctx.canvas.height = window.innerHeight;
 var img = new Image();
+
+// img.onload = function () {
+//   ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
+// };
 
 setInterval(() => {
   document.getElementById("fps-counter").innerHTML = `${fps} FPS`;
@@ -155,16 +164,20 @@ setInterval(() => {
   }
   fps = 0;
 }, 1000);
-
+// socket.emit("command", {
+//   id: document.getElementById("id").getAttribute("data-id"),
+//   cmd: "screenshot",
+// });
 socket.on("screenshotResult", (msg) => {
-  if(msg.id == c.id){
   var img = new Image();
 
   img.onload = function () {
-    ctx.drawImage(img, 0, 0, 1920, 1080);
+    ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
   };
   img.src = "data:image/jpeg;base64," + msg.response;
 
   fps += 1;
-  }
+
+  // document.getElementById("liveCam").src =
+  //   "data:image/jpg;base64," + msg.response;
 });

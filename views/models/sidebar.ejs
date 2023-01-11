@@ -1,17 +1,19 @@
 <link rel="stylesheet" href="/css/sidebar.css">
 <div class="sidebar">
-<div class="sidebar-content">
+    <div class="sidebar-content">
 
-    <ul>
-    <h1>Witaj <%= username %></h1>
-    
-    <li><a href="#">Dashboard</a></li>
-        <li><a href="#">Ustawienia</a></li>
-        <li>
-            <form action="/logout" method="post">
-                <button type="submit">Wyloguj</button>
-            </form>
-        </li>
-    </ul>
+        <ul>
+            <h1>Witaj <%= username %>
+            </h1>
+
+            <li><a href="./dashboard">Dashboard</a></li>
+            <li><a href="./settings">Ustawienia</a></li>
+            <li><a href="./ftp">FTP</a></li>
+            <li>
+                <form action="/logout" method="post">
+                    <button type="submit">Wyloguj</button>
+                </form>
+            </li>
+        </ul>
     </div>
 </div>

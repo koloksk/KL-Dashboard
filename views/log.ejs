@@ -17,6 +17,12 @@
     <%}}} else if (type == "jpg"){ %>
     <img src="data:image/png;base64,<%= content %>" alt="" srcset="" width="100%" height="100%" />
 
-    <%} else if (type == "txt"){%> <%= content %> <%}%>
+    <%} else if (type == "txt"){
+      var filecontent = content;
+     
+        %> 
+      <%- filecontent.replace(/\n/g, '<br>') %>
+    
+    <%}%>
   </body>
 </html>

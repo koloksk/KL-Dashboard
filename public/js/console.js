@@ -2,7 +2,6 @@
   // Get references to the button, console, input, and output elements
 
   const inputs = document.querySelectorAll("#input");
-  const socket = io();
 
   // When the user presses Enter in the input element,
   // execute the command and display the result in the output element

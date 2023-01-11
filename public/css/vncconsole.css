@@ -1,0 +1,63 @@
+.console {
+    position: absolute;
+    bottom: 50px;
+    max-width: 50%;
+    z-index: 1;
+    max-height: 200px;
+    min-height: 50px;
+
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 0 20px 8px #000000;
+    color: white;
+    margin-top: 20px;
+    padding: 20px;
+    font-family: monospace;
+    width: 100%;
+  
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  #header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  #input {
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+    color: white;
+    background-color: black;
+    border: none;
+    outline: none;
+  }
+  #output {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    overflow-wrap: anywhere;
+    max-height: 150px;
+  }
+  #input:hover {
+    border-bottom: 1px solid;
+    margin-bottom: -1px;
+  }
+  #input:focus {
+    border-bottom: 1px solid;
+    margin-bottom: -1px;
+  }
+
+  #connection_error{
+    background-color:red;
+    top: 20px;
+    width: 100%;
+    height: 20px;
+    text-align: center;
+    position: absolute;
+    z-index: 1;
+    color: white;
+
+  }
+  

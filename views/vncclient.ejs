@@ -4,43 +4,67 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <link rel="stylesheet" type="text/css" href="/css/vnc.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vncconsole.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+      integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
+      crossorigin="anonymous"
+    />
     <title><%= clientname %></title>
   </head>
   <body>
-    <h1 id="id" data-id="<%= clientid %>"></h1>
+    <div id="fps-counter" style="display: none">0 FPS</div>
     <div class="view">
-      <!-- <img
+      <img
         id="liveCam"
         src="https://media.tenor.com/UnFx-k_lSckAAAAM/amalie-steiness.gif"
-      /> -->
-      <canvas id="c" width="1000" height="1000"></canvas>
-
+      />
+      <canvas class="c" id="<%= clientid %>"></canvas>
+      <%- include('./models/console') %>
+      <div class="options-bar">
+        <div class="icon hide">
+          <i style="color: red" class="fa fa-signal"></i>
+        </div>
+        <div class="icon hide">
+          <i style="color: red" class="fa fa-times"></i>
+        </div>
+        <div class="icon hide">
+          <i style="color: white" class="fa fa-mouse-pointer"></i>
+        </div>
+        <div class="icon hide">
+          <i style="color: white" class="fa fa-terminal"></i>
+        </div>
+        <div class="icon hide">
+          <i style="color: white" class="fa fa-window-maximize"></i>
+        </div>
+        <div class="icon" id="button-for-hiding-elements">
+          <i style="color: white" class="fa fa-ellipsis-v"></i>
+        </div>
+      </div>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script src="/js/socketInit.js"></script>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script>
+      $(function () {
+        $(".options-bar").draggable();
+        $(".console").draggable();
 
-      const socket = io();
-      setInterval(() => {
-        socket.emit("command", {
-          id: document.getElementById("id").getAttribute("data-id"),
-          cmd: "screenshot",
-        });
-      }, 500);
-
-      socket.on("screenshotResult", (msg) => {
-        var c=document.getElementById("c");
-            var ctx=c.getContext("2d");
-            var img=new Image();
-            img.onload = function(){
-                  ctx.drawImage(img,0,0);
-            };
-            img.src = "data:image/jpg;base64," + msg.response;;
-
-        // document.getElementById("liveCam").src =
-        //   "data:image/jpg;base64," + msg.response;
       });
     </script>
+    <script src="/js/vncclient.js"></script>
+
   </body>
 </html>
