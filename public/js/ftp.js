@@ -1,56 +1,65 @@
 const deletebuttons = document.querySelectorAll(".delete-button");
-const downloadbuttons = document.querySelectorAll(".download-button");
+// const downloadbuttons = document.querySelectorAll(".download-button");
 var dropzone = document.getElementById("upload_area");
+var uploadtext = document.getElementById("upload_text");
+var courtine = document.getElementById("courtine");
 
-downloadbuttons.forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    const clientname = button
-      .closest(".computer-card")
-      .getAttribute("filename"); //get button computer card
+// downloadbuttons.forEach((button) => {
+//   button.addEventListener("click", async (e) => {
+//     const clientname = button
+//       .closest(".computer-card")
+//       .getAttribute("filename"); //get button computer card
 
-    window.location.href = `/ftp/download/${clientname}`;
-  });
-});
-deletebuttons.forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    const clientname = button
-      .closest(".computer-card")
-      .getAttribute("clientname"); //get button computer card
+//     window.location.href = `/ftp/${clientname}`;
+//   });
+// });
 
-    socket.emit("delete", {
-      clientname: clientname,
+function remove(file) {
+  if (file != null) {
+    socket.emit("delete-ftp", {
+      filename: file,
     });
-  });
-});
 
-var upload = function (files) {
-  var formData = new FormData(),
-    x;
-
-  for (x = 0; x < files.length; x++) {
-    formData.append("file[]", files[x]);
+    $(`div[filename="${file}"]`).each(function () {
+      // `this` is the div
+      this.remove();
+    });
   }
+}
+function upload(files) {
+  console.log(files[0]);
+  var data = new FormData();
+  data.append("file", files[0]);
 
-  fetch("./ftp/upload/", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => console.log(res))
-    .catch((err) => ("Error occured", err));
-};
+  const request = new XMLHttpRequest();
+
+  request.open("POST", "", true);
+  request.onreadystatechange = () => {
+    if (request.readyState === 4 && request.status === 200) {
+      console.log(request.responseText);
+      $("#cards").load(" #cards");
+    }
+  };
+
+  request.send(data);
+}
 
 dropzone.ondrop = function (e) {
   e.preventDefault();
-  this.className = "dropzone";
+  courtine.className = "";
+  uploadtext.className = "upload-text";
   upload(e.dataTransfer.files);
+  return false;
 };
 
 dropzone.ondragover = function () {
-  this.className = "dropzone dragover";
+  courtine.className = "dragover";
+  uploadtext.className = "upload-text dragover";
   return false;
 };
 
 dropzone.ondragleave = function () {
-  this.className = "dropzone";
+  courtine.className = "";
+  uploadtext.className = "upload-text";
   return false;
 };

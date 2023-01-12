@@ -1,13 +1,22 @@
 <div class="computer-card" clientname="<%= clientname%>" id="<%= id%>">
   <div class="info">
+    <%if(version != latestversion){%>
+    <i
+      class="fas fa-circle"
+      title="Status Online &#10; ip: <%= ip%> &#10; wersja: <%= version%>"
+      style="color: blue"
+    ></i>
+    <%} else {%>
     <i
       class="fas fa-circle"
       title="Status Online &#10; ip: <%= ip%> &#10; wersja: <%= version%>"
       style="color: green"
     ></i>
-    <a><%= clientname%></a>
-
-    <i class="fas fa-hdd"></i> 64/500 GB <i class="fab fa-windows"></i> <%= system%>
+    <%}%>
+    <a><input type="text" name="" id="" value="<%= clientname%>"></input></a>
+    <div class="resources">
+      <i class="fas fa-hdd"></i> 64/500 GB <i class="fab fa-windows"></i> <%= system%>
+    </div>
   </div>
   <div class="options">
     <button class="shutdown-button" style="color: red">
@@ -16,15 +25,17 @@
     <button class="console-button">
       <i class="fas fa-terminal"></i><snap>Konsola</snap>
     </button>
-    <button class="log-button">
+    <button class="log-button" onclick="window.location.href = `/logs/<%= clientname%>`">
       <i style="color: gold" class="fas fa-file"></i><snap>Logi</snap>
     </button>
-    <button class="screenshot-button">
-      <i style="color: green" class="fas fa-camera"></i><snap>SS</snap>
-    </button>
-    <button class="vnc-button">
+    <button class="vnc-button" onclick="window.location.href = `/vnc/<%= clientname%>/<%= id%>`">
       <i style="color: green" class="fas fa-desktop"></i><snap>VNC</snap>
     </button>
+    <% if(version != latestversion){%>
+    <button class="update-button" onclick="">
+      <i style="color: rgb(31, 135, 169)" class="fas fa-download"></i><snap>Update</snap>
+    </button>
+    <%}%>
   </div>
   <%- include('./console') %>
   <!-- <div class="console" style="display: none">

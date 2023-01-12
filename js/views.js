@@ -14,6 +14,8 @@ exports.dashboard = (req, res) => {
       username: req.session.username,
       clients: index.clients,
       offlineclients: index.offlineclients,
+      latestversion: 1.3,
+
     });
   } else res.render("index");
 };
@@ -63,5 +65,5 @@ exports.login = (req, res) => {
 }
 
 exports.errorHandler = (req, res) => {
-  res.redirect("/");
+  res.redirect("/dashboard");
 };

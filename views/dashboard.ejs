@@ -19,11 +19,11 @@
       <%- include('./models/sidebar') %>
       <div class="main-content">
         <h1>Dashboard</h1>
-        <div class="computer-cards">
+        <div class="computer-cards" id="cards">
           <!-- Online Clients -->
 
           <% for(let i = 0; i < clients.length; i++){ %>
-            <%- include('./models/computercard',{id: clients[i].id, clientname: clients[i].name, ip: clients[i].ip,version: clients[i].version,system: clients[i].system}) %>
+            <%- include('./models/computercard',{id: clients[i].id, clientname: clients[i].name, ip: clients[i].ip,version: clients[i].version,system: clients[i].system, latestversion: latestversion}) %>
           <% } %>
 
           <!-- Offline Clients -->
@@ -33,10 +33,11 @@
         </div>
       </div>
     </div>
-    <script src="/js/dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="/js/socketInit.js"></script>
-
+    <script src="/js/dashboard.js"></script>
     <script src="/js/console.js"></script>
   </body>
 </html>

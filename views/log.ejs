@@ -2,27 +2,47 @@
 <html>
   <head>
     <title>Logi</title>
+    <link rel="stylesheet" type="text/css" href="/css/dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+      integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/css/console.css" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
 
   <body>
-    <h1><%= clientname %></h1>
-    <% if(type == null){ for(let i = 0; i < content.length; i++){ if(dirname != null){%>
-    <a href="/logs/<%= clientname %>/<%= dirname %>/<%= content[i] %>"
-      ><%= content[i] %></a
-    >
-    <% }else{%>
-    <a href="/logs/<%= clientname %>/<%= content[i] %>"><%= content[i] %></a>
+    <div class="container">
+      <%- include('./models/sidebar') %>
+      <div class="main-content">
+        <h1>Logi <%= clientname %></h1>
+        <div class="computer-cards" id="cards">
+          <% if(type == null){
+            for(let i = 0; i <content.length; i++){
+            %> 
+          <%- include('./models/filecard',{filename: content[i], size: '', view: true}) %> 
+          <% }} else {  
+            if (type == "jpg"){ %>
+          <img
+            src="data:image/png;base64,<%= content %>"
+            alt=""
+            srcset=""
+            width="100%"
+            height="100%"
+          />
 
-    <%}}} else if (type == "jpg"){ %>
-    <img src="data:image/png;base64,<%= content %>" alt="" srcset="" width="100%" height="100%" />
-
-    <%} else if (type == "txt"){
-      var filecontent = content;
-     
-        %> 
-      <%- filecontent.replace(/\n/g, '<br>') %>
-    
-    <%}%>
+          <%} else if (type == "txt"){ var filecontent = content; %> 
+            <%-
+          filecontent.replace(/\n/g, '<br />') %> <%}}%>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="/js/socketInit.js"></script>
   </body>
 </html>

