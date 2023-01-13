@@ -116,7 +116,7 @@ html {
 input:focus{
   outline: none;
 }
-input {
+#computer-name {
   border: none;
   outline: none;
   background-color: rgba(0,0,0,0);

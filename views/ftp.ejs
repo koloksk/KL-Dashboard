@@ -35,7 +35,7 @@
     
 
           <% for(let i = 0; i < files.length; i++){ %>
-            <%- include('./models/filecard',{filename: files[i], size: sizes[i], view: false}) %>
+            <%- include('./models/filecard',{filename: files[i], size: sizes[i], view: false, download: true}) %>
           <% } %>
         </div>
       </div>

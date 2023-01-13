@@ -295,7 +295,8 @@ io.on("connection", (socket) => {
       console.log("Wyszedl: " + socket.name + " " + socket.ip);
 
       removeById(clients, socket.id);
-      offlineclients.push(socket.name);
+      if(!offlineclients.includes(socket.name))
+        offlineclients.push(socket.name);
       //offlineclients.push(socket.name);
       io.emit("leave", {name: socket.name})
 
@@ -311,12 +312,20 @@ function parseClientInfo(decodedString, socket) {
     line.startsWith("Host Name:")
   );
   const hostName = hostNameLine.split(":")[1].trim();
+  const ramLine = outputLines.find((line) =>
+    line.startsWith("Total Physical Memory:")
+  );
+  const ram = ramLine.split(":")[1].trim().replace("�", "");
+
+
+  
   const ipAddress = decodedString.match(/IP address[^:]+: (.*)/)[1];
   socket.name = hostName;
   clients.push({
     id: socket.id,
     name: hostName,
     ip: ipAddress,
+    ram: ram,
     version: socket.version,
     system: osName,
   });
@@ -340,7 +349,7 @@ function checkDirectoryExists(clientname) {
 function writeToFile(clientname, msg) {
     var d = new Date(),
       dformat =
-        [d.getMonth() + 1, d.getDate(), d.getFullYear()].join("_")
+        [d.getDate(), d.getMonth() + 1, d.getFullYear()].join("_")
 
   msg = msg.replace("\n", "");
   fs.appendFileSync(`./clients/${clientname}/${dformat}.txt`, msg + "\n");

@@ -14,7 +14,7 @@ exports.dashboard = (req, res) => {
       username: req.session.username,
       clients: index.clients,
       offlineclients: index.offlineclients,
-      latestversion: 1.3,
+      latestversion: 1.7,
 
     });
   } else res.render("index");

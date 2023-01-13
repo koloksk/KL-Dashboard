@@ -1,7 +1,8 @@
 <div class="computer-card" filename="<%= filename%>">
     <div class="info">
-      <a><%= filename%></a>
-      <a><%= size%></a>
+      <a><%= filename%> &nbsp</a>
+      
+      <a> <%= size%>byte</a>
 
     </div>
     
@@ -13,9 +14,11 @@
     >
       <i class="fas fa-trash"></i><snap>Usuń</snap>
     </button>
+    <% if(download == true){ %> 
       <button class="download-button" onclick="window.location.href=`${window.location}/<%=filename%>`">
         <i style="color: gold" class="fas fa-download"></i><snap>Pobierz</snap>
       </button>
+      <%}%>
       <% if(view == true){ %> 
 
       <button class="view-button" onclick="window.location.href=`${window.location}/<%=filename%>`">
