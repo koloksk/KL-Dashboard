@@ -19,7 +19,7 @@ html {
   padding: 20px;
   width: 100%;
   overflow-y: scroll;
-
+  max-height: 100%;
 }
 
 .computer-cards {
@@ -48,12 +48,11 @@ html {
   display: flex;
   flex-direction: row;
   align-items: center;
-  
+  flex: 0 0 60%;
+
 
 }
-.computer-card .info {
-  flex: 0 0 60%;
-}
+
 .computer-card .options {
   flex: 0 0 40%;
 
@@ -71,35 +70,6 @@ html {
 
   cursor: pointer;
   float: right;
-}
-@media (max-width: 767px) {
-  button snap { font-size: 0; }
-  .resources{
-    display: none;
-  }
-  .computer-card .info {
-    flex: 0 0 100%;
-  }
-  .computer-card .options {
-    flex: 0 0 100%;
-  }
-  .computer-card .options button{
-    max-width: 60px;
-    max-height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-  }
-  .computer-card .options i{
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-
-  }
-
 }
 
 .computer-card button:hover {
@@ -121,4 +91,36 @@ input:focus{
   outline: none;
   background-color: rgba(0,0,0,0);
   max-width: 20vh;
+}
+
+@media (max-width: 767px) {
+  button snap { font-size: 0; }
+  .resources{
+    display: none;
+  }
+  .computer-card .info {
+    flex: 0 0 100%;
+  }
+  .computer-card .options {
+    flex: 0 0 100%;
+    display: none;
+
+  }
+  .computer-card .options button{
+    max-width: 60px;
+    max-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  }
+  .computer-card .options i{
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+
+  }
+
 }

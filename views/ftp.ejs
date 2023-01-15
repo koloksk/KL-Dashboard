@@ -4,7 +4,6 @@
     <title>Dashboard</title>
     <link rel="stylesheet" type="text/css" href="/css/dashboard.css" />
     <link rel="stylesheet" type="text/css" href="/css/ftp.css" />
-    <link rel="stylesheet" href="/css/console.css" />
 
     <link
       rel="stylesheet"
@@ -14,6 +13,7 @@
     />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <%- include('./models/scripts') %>
   </head>
 
   <body >
@@ -41,9 +41,8 @@
       </div>
     </div>
     <script src="/js/ftp.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="/js/socketInit.js"></script>
+    <script src="/js/log.js"></script>
+
   </body>
 </html>

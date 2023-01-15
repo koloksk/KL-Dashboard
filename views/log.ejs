@@ -9,9 +9,10 @@
       integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="/css/console.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <%- include('./models/scripts') %>
+
   </head>
 
   <body>
@@ -23,16 +24,15 @@
           <% if(type == null){
             for(let i = 0; i <content.length; i++){
             %> 
-          <%- include('./models/filecard',{filename: content[i], size: '', view: true, download: false}) %> 
+          <%- include('./models/filecard',{filename: content[i], size: sizes[i], view: true, download: false}) %> 
           <% }} else {if (type == "txt"){ var filecontent = content; %> 
             <%-
           filecontent.replace(/\n/g, '<br />') %> <%}}%>
         </div>
       </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="/js/socketInit.js"></script>
+    <script src="/js/log.js"></script>
+
   </body>
 </html>

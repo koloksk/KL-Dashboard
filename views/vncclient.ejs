@@ -19,6 +19,8 @@
       integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
       crossorigin="anonymous"
     />
+    <%- include('./models/scripts') %>
+
     <title><%= clientname %></title>
   </head>
   <body>
@@ -53,17 +55,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
-    <script src="/js/socketInit.js"></script>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-    <script>
-      $(function () {
-        $(".options-bar").draggable();
-        $(".console").draggable();
-
-      });
-    </script>
+    <script src="/js/socketInit.js"></script>>
     <script src="/js/vncclient.js"></script>
 
   </body>

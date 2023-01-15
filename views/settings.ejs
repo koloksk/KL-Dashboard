@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="/css/console.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <%- include('./models/scripts') %>
+
   </head>
 
   <body>
@@ -19,6 +21,15 @@
       <%- include('./models/sidebar') %>
       <div class="main-content">
         <h1>Ustawienia</h1>
+
+        <div>
+          <form action="" method="post">
+            <span>Częstotliwość tworzenia screenshotów VNC:</span>
+            <input type="number" name="" id="" value="20" step="10">
+            <span></span>
+            <input type="submit" value="Zapisz">
+          </form>
+        </div>
       </div>
     </div>
   </body>

@@ -1,12 +1,12 @@
 <div class="computer-card" filename="<%= filename%>">
-    <div class="info">
+    <div class="info" onclick="showoptions(this)">
       <a><%= filename%> &nbsp</a>
       
-      <a> <%= size%>byte</a>
+      <a> <%= size%></a>
 
     </div>
     
-    <div class="options">
+    <div class="options" >
       <button
       class="delete-button"
       style="color: red"

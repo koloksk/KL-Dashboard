@@ -10,6 +10,12 @@ const fullscrean_button = document.querySelector(".fa-window-maximize");
 
 var last_x = 0;
 
+
+$(function () {
+  $(".options-bar").draggable();
+  $(".console").draggable();
+
+});
 // When the user presses Enter in the input element,
 // execute the command and display the result in the output element
 input.addEventListener("keyup", (e) => {
@@ -47,7 +53,12 @@ leave_button.addEventListener("click", () => {
   });
   window.location.href = `/dashboard`;
 });
-
+window.onbeforeunload = function(){
+  socket.emit("command", { // version >1.4
+    id: c.id,
+    cmd: "livestop",
+  });
+};
 console_button.addEventListener("click", async (e) => {
   const consoleElement = document.querySelector(".console");
 

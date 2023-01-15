@@ -77,11 +77,7 @@ app.post("/", render.login);
 
 app.get("/vnc/:ClientName/:ClientId", render.vncclient);
 
-function getFilesizeInBytes(filename) {
-  var stats = fs.statSync(`./ftp/${filename}`);
-  var fileSizeInBytes = stats.size;
-  return fileSizeInBytes;
-}
+
 
 app.get("/ftp/:FileName?", (req, res) => {
   if (req.params.FileName == null) {
@@ -90,7 +86,7 @@ app.get("/ftp/:FileName?", (req, res) => {
       var sizes = [];
 
       files.forEach(function(file){
-        sizes.push(getFilesizeInBytes(file))
+        sizes.push(getFilesize(`./ftp/${file}`))
       })
       console.log(sizes);
       res.render("ftp", {
@@ -108,6 +104,7 @@ app.get("/ftp/:FileName?", (req, res) => {
     });
   } 
 });
+
 app.post("/ftp", (req, res) => {
   //fs.appendFileSync("./ftp/" + "test", req.)
 
@@ -133,6 +130,7 @@ app.get("/logs/:ClientName/:FileName?", (req, res) => {
   const FileName = req.params.FileName;
   var fileContents;
   var ext;
+  var sizes = [];
 
     if (FileName != null) {
       //Pobiera zawartosc pliku
@@ -154,6 +152,9 @@ app.get("/logs/:ClientName/:FileName?", (req, res) => {
       } catch (err) {}
     } else {
       fileContents = fs.readdirSync(`./clients/${ClientName}`);
+      fileContents.forEach(function(file){
+        sizes.push(getFilesize(`./clients/${ClientName}/${file}`))
+      })
     }
 
 
@@ -165,6 +166,7 @@ app.get("/logs/:ClientName/:FileName?", (req, res) => {
       filename: FileName,
       isLogged: req.session.isLogged,
       username: req.session.username,
+      sizes: sizes,
       type: ext,
     });
   } else res.render("index");
@@ -364,8 +366,30 @@ const removeById = (arr, id) => {
   }
   return !!arr.splice(requiredIndex, 1);
 };
+function formatBytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes'
 
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+function getFilesize(path, decimals = 2) {
+  var stats = fs.statSync(path);
+  var bytes = stats.size;
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
 
 exports.clients = clients;
 exports.offlineclients = offlineclients;

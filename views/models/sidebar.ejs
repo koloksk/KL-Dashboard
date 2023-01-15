@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="/css/sidebar.css">
-<div class="sidebar">
+<div class="sidebar" id="menu">
     <div class="sidebar-content">
 
         <ul>
@@ -17,3 +17,16 @@
         </ul>
     </div>
 </div>
+
+
+<script src="././js/swipe.min.js"></script>
+<script>
+    document.addEventListener('swiped-right', function(e) {
+        console.log("swipe right")
+        $("#menu").animate({ left: "0" });
+      });
+      document.addEventListener('swiped-left', function(e) {
+        console.log("swipe left")
+        $("#menu").animate({ left: "-100%" });
+      });
+  </script>
