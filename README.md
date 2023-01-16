@@ -21,6 +21,7 @@ A Dashboard project to control Emmet clients.
 - express
 - express-session
 - express-fileupload
+- ejs
 - socket.io
 - fs
 
