@@ -7,64 +7,72 @@ const deletebuttons = document.querySelectorAll(".delete-button");
 //const computer_list = document.querySelector('.computer-cards');
 
 // For each button, add an event listener that shows or hides its corresponding console
-consolebuttons.forEach((button) => {
-  button.addEventListener("click", (e) => {
-    // Find the console corresponding to this button
-    const computercardElement = button.closest(".computer-card"); //get button computer card
-    const consoleElement = computercardElement.querySelector(".console"); //get console inside consolebuttons computer card
 
-    if (consoleElement) {
-      if (consoleElement.style.display == "none") {
-        consoleElement.style.display = "block";
-      } else {
-        consoleElement.style.display = "none";
-      }
+function showconsole(element){
+  const computercardElement = element.closest(".computer-card"); //get button computer card
+  const consoleElement = computercardElement.querySelector(".console"); //get console inside consolebuttons computer card
+
+  if (consoleElement) {
+    if (consoleElement.style.display == "none") {
+      consoleElement.style.display = "block";
+    } else {
+      consoleElement.style.display = "none";
     }
+  }
 
-    console.log(e.target.id);
+}
+
+function update(element){
+  const clientid = element.closest(".computer-card").id; //get button computer card
+
+  socket.emit("command", {
+    id: clientid,
+    cmd: "update",
   });
-});
+  Toastify({
+    text: "Wywołano update dla: " + clientid,
+    duration: 3000,
+    gravity: "top", // `top` or `bottom`
+    position: "right", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    style: {
+      background: "linear-gradient(to right, #00b09b, #96c93d)",
+    },
+    onClick: function(){} // Callback after click
+  }).showToast();
+}
 
-shutdownbuttons.forEach((button) => {
-  button.addEventListener("click", (e) => {
-    const clientid = button.closest(".computer-card").id; //get button computer card
+function shutdown(element){
+  const clientid = element.closest(".computer-card").id; //get button computer card
 
-    socket.emit("command", {
-      id: clientid,
-      cmd: "shutdown",
-    });
+  socket.emit("command", {
+    id: clientid,
+    cmd: "shutdown",
   });
-});
-// screenshotbuttons.forEach((button) => {
-//   button.addEventListener("click", (e) => {
-//     const clientid = button.closest(".computer-card").id; //get button computer card
+};
 
-//     socket.emit("command", {
-//       id: clientid,
-//       cmd: "screenshot",
-//     });
-//   });
-// });
-// logbuttons.forEach((button) => {
-//   button.addEventListener("click", async (e) => {
-//     const clientname = button
-//       .closest(".computer-card")
-//       .getAttribute("clientname"); //get button computer card
 
-//     window.location.href = `/logs/${clientname}`;
-//   });
-// });
-deletebuttons.forEach((button) => {
-  button.addEventListener("click", async (e) => {
-    const clientname = button
-      .closest(".computer-card")
-      .getAttribute("clientname"); //get button computer card
-      
-      socket.emit("delete", {
-        clientname: clientname
-      });
+function removeclient(element){
+  const clientname = element
+  .closest(".computer-card")
+  .getAttribute("clientname"); //get button computer card
+  
+  socket.emit("delete", {
+    clientname: clientname
   });
-});
+
+  Toastify({
+    text: "Usunięto klienta: " + clientname,
+    duration: 3000,
+    gravity: "top", // `top` or `bottom`
+    position: "right", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    style: {
+      background: "linear-gradient(to right, #00b09b, #96c93d)",
+    },
+    onClick: function(){} // Callback after click
+  }).showToast();
+}
 
 function showoptions(element){
   if(window.innerWidth < 767)

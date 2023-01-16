@@ -36,8 +36,20 @@ function upload(files) {
   request.open("POST", "", true);
   request.onreadystatechange = () => {
     if (request.readyState === 4 && request.status === 200) {
+      Toastify({
+        text: "Poprawnie załadowano plik",
+        duration: 3000,
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center` or `right`
+        stopOnFocus: true, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #00b09b, #96c93d)",
+        },
+        onClick: function(){} // Callback after click
+      }).showToast();
       console.log(request.responseText);
       $("#cards").load(" #cards");
+
     }
   };
 

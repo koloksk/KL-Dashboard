@@ -19,10 +19,10 @@
     </div>
   </div>
   <div class="options">
-    <button class="shutdown-button" style="color: red">
+    <button class="shutdown-button" style="color: red" onclick="shutdown(this)">
       <i class="fas fa-power-off"></i><snap>Wylacz</snap>
     </button>
-    <button class="console-button">
+    <button class="console-button" onclick="showconsole(this)">
       <i class="fas fa-terminal"></i><snap>Konsola</snap>
     </button>
     <button class="log-button" onclick="window.location.href = `/logs/<%= clientname%>`">
@@ -32,7 +32,7 @@
       <i style="color: green" class="fas fa-desktop"></i><snap>VNC</snap>
     </button>
     <% if(version != latestversion){%>
-    <button class="update-button" onclick="">
+    <button class="update-button" onclick="update(this)">
       <i style="color: rgb(31, 135, 169)" class="fas fa-download"></i><snap>Update</snap>
     </button>
     <%}%>

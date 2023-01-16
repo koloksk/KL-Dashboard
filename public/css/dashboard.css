@@ -124,3 +124,34 @@ input:focus{
   }
 
 }
+@media (max-width: 1200px) {
+  .console-button
+  {
+    width: 130px;
+  }
+
+  .vnc-button
+  {
+    width: 130px;
+  }
+
+  .shutdown-button
+  {
+    width: 130px;
+  }
+
+  .log-button
+  {
+    width: 130px;
+  }
+  
+  .options
+  {
+    margin-left: auto;
+  }
+
+  .info
+  {
+    width: 100%;
+  }
+}

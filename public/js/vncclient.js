@@ -1,19 +1,23 @@
 const options_bar = document.querySelector(".options-bar");
-const leave_button = document.querySelector(".fa-times");
-const connection_quality = document.querySelector(".fa-signal");
-const console_button = document.querySelector(".fa-terminal");
+const leave_button = document.querySelector("#close");
+const connection_quality = document.querySelector("#signal");
+const connection_quality_icon = document.querySelector(".fa-signal");
+
+const console_button = document.querySelector("#console");
+const console_button_icon = document.querySelector(".fa-terminal");
+
 const input = document.querySelector("#input");
 const output = document.querySelector("#output");
 const c = document.querySelector(".c");
 const fps_counter = document.querySelector("#fps-counter");
-const fullscrean_button = document.querySelector(".fa-window-maximize");
+const fullscrean_button = document.querySelector("#maximize");
 
 var last_x = 0;
 
 
 $(function () {
-  $(".options-bar").draggable();
-  $(".console").draggable();
+  $(".options-bar").draggable({ containment: "window" });
+  $(".console").draggable({ containment: "window" });
 
 });
 // When the user presses Enter in the input element,
@@ -65,10 +69,10 @@ console_button.addEventListener("click", async (e) => {
   if (consoleElement) {
     if (consoleElement.style.display == "none") {
       consoleElement.style.display = "block";
-      console_button.style.color = "blue";
+      console_button_icon.style.color = "blue";
     } else {
       consoleElement.style.display = "none";
-      console_button.style.color = "white";
+      console_button_icon.style.color = "white";
     }
   }
 });
@@ -175,11 +179,11 @@ setInterval(() => {
   document.getElementById("fps-counter").innerHTML = `${fps} FPS`;
   console.log(fps);
   if (fps >= 4) {
-    connection_quality.style.color = "green";
+    connection_quality_icon.style.color = "green";
   } else if (fps == 3) {
-    connection_quality.style.color = "yellow";
+    connection_quality_icon.style.color = "yellow";
   } else {
-    connection_quality.style.color = "red";
+    connection_quality_icon.style.color = "red";
   }
   fps = 0;
 }, 1000);
