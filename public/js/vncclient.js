@@ -150,12 +150,19 @@ document
     });
   });
 
-// setInterval(() => {
-//   socket.emit("command", {
-//     id: document.getElementById("id").getAttribute("data-id"),
-//     cmd: "screenshot",
-//   });
-// }, 250);
+  function getMousePosition(canvas, event) {
+    let rect = canvas.getBoundingClientRect();
+    let x = event.clientX - rect.left;
+    let y = event.clientY - rect.top;
+    console.log("Coordinate x: " + x, 
+                "Coordinate y: " + y);
+}
+
+  
+c.addEventListener("mousedown", function(e)
+{
+    getMousePosition(c, e);
+});
 
 socket.emit("command", {
   id: c.id,
@@ -177,7 +184,7 @@ var img = new Image();
 
 setInterval(() => {
   document.getElementById("fps-counter").innerHTML = `${fps} FPS`;
-  console.log(fps);
+  //console.log(fps);
   if (fps >= 4) {
     connection_quality_icon.style.color = "green";
   } else if (fps == 3) {
@@ -189,13 +196,14 @@ setInterval(() => {
 }, 1000);
 
 socket.on("screenshotResult", (msg) => {
+  if(msg.id == c.id){
   img.onload = function () {
     ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
   };
   img.src = "data:image/jpeg;base64," + msg.response;
 
   fps += 1;
-
+  }
   // document.getElementById("liveCam").src =
   //   "data:image/jpg;base64," + msg.response;
 });

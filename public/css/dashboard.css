@@ -4,8 +4,9 @@ html {
   background-color: #f2f2f2;
   height: 100%;
   margin: 0;
-}
+   overscroll-behavior-x: none; /*Disable mobile swipe to back */
 
+}
 
 .container {
   height: 100%;
