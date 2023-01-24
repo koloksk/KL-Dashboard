@@ -3,7 +3,7 @@
 
 # KL Dashboard
 
-A Dashboard project to control Emmet clients.
+A Dashboard project to control [Emmet](https://github.com/WicherK/Emmet) clients.
 
 
 
