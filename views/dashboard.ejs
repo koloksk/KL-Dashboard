@@ -30,7 +30,7 @@
 
           <!-- Offline Clients -->
           <% for(let i = 0; i < offlineclients.length; i++){ %>
-            <%- include('./models/offlinecomputercard',{clientname: offlineclients[i]}) %>
+            <%- include('./models/offlinecomputercard',{clientname: offlineclients[i].name}) %>
           <% } %>
         </div>
       </div>

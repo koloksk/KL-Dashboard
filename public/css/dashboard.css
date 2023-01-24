@@ -44,7 +44,75 @@ html {
   align-items: center;
 
 }
+.settings-card {
+  width: 90%;
+  padding: 20px;
+  margin: 20px auto;
+  background: #f2f2f2;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 0 20px 8px #d0d0d0;
+  /*cursor: pointer;*/
+  flex-wrap: wrap;
+  align-items: center;
 
+}
+.settings-card {
+  width: 90%;
+  padding: 20px;
+  margin: 20px auto;
+  background: #f2f2f2;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 0 20px 8px #d0d0d0;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  }
+  
+  .settings-card span {
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  }
+  
+  .settings-card input[type="password"],
+  .settings-card input[type="number"],
+  .settings-card input[type="text"] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  }
+  
+  .settings-card input[type="password"]:focus,
+  .settings-card input[type="number"]:focus,
+  .settings-card input[type="text"]:focus {
+  border: 1px solid #555;
+  outline: none;
+  }
+  
+  .settings-card input[type="submit"] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  }
+  
+  .settings-card input[type="submit"]:hover {
+  background-color: #45a049;
+  }
 .info{
   display: flex;
   flex-direction: row;

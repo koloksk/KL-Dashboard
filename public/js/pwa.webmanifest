@@ -1,0 +1,16 @@
+{
+    "name": "KL-Dashboard",
+    "short_name": "KLDashboard",
+    "description": "Emmet clients control dashboard",
+    "icons": [
+      {
+        "src": "./images/logo-color.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "start_url": "/",
+    "display": "fullscreen",
+    "theme_color": "#764ABC",
+    "background_color": "#764ABC"
+  }

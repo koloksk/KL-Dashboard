@@ -14,11 +14,9 @@ const fullscrean_button = document.querySelector("#maximize");
 
 var last_x = 0;
 
-
 $(function () {
   $(".options-bar").draggable({ containment: "window" });
   $(".console").draggable({ containment: "window" });
-
 });
 // When the user presses Enter in the input element,
 // execute the command and display the result in the output element
@@ -51,14 +49,16 @@ leave_button.addEventListener("click", () => {
     id: c.id,
     cmd: "live",
   });
-  socket.emit("command", { // version >1.4
+  socket.emit("command", {
+    // version >1.4
     id: c.id,
     cmd: "livestop",
   });
   window.location.href = `/dashboard`;
 });
-window.onbeforeunload = function(){
-  socket.emit("command", { // version >1.4
+window.onbeforeunload = function () {
+  socket.emit("command", {
+    // version >1.4
     id: c.id,
     cmd: "livestop",
   });
@@ -92,40 +92,56 @@ fullscrean_button.addEventListener("click", async (e) => {
 });
 function requestFullScreen(element) {
   // Supports most browsers and their versions.
-  var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
-  var exitMethod = element.exitFullscreen || document.webkitCancelFullScreen || document.mozCancelFullScreen || document.msCancelFullScreen;
-  var fullScreenMode = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen; // This will return true or false depending on if it's full screen or not.
+  var requestMethod =
+    element.requestFullScreen ||
+    element.webkitRequestFullScreen ||
+    element.mozRequestFullScreen ||
+    element.msRequestFullScreen;
+  var exitMethod =
+    element.exitFullscreen ||
+    document.webkitCancelFullScreen ||
+    document.mozCancelFullScreen ||
+    document.msCancelFullScreen;
+  var fullScreenMode =
+    document.fullScreen ||
+    document.mozFullScreen ||
+    document.webkitIsFullScreen; // This will return true or false depending on if it's full screen or not.
 
   if (fullScreenMode) {
     //alert("wyjdz")
 
-    if (exitMethod) { // Native full screen.
-      closeFullscreen()
-  } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+    if (exitMethod) {
+      // Native full screen.
+      closeFullscreen();
+    } else if (typeof window.ActiveXObject !== "undefined") {
+      // Older IE.
       var wscript = new ActiveXObject("WScript.Shell");
       if (wscript !== null) {
-          wscript.SendKeys("{F11}");
+        wscript.SendKeys("{F11}");
       }
-  }
-
-} else{
-  if (requestMethod) { // Native full screen.
+    }
+  } else {
+    if (requestMethod) {
+      // Native full screen.
       requestMethod.call(element);
-  } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+    } else if (typeof window.ActiveXObject !== "undefined") {
+      // Older IE.
       var wscript = new ActiveXObject("WScript.Shell");
       if (wscript !== null) {
-          wscript.SendKeys("{F11}");
+        wscript.SendKeys("{F11}");
       }
+    }
   }
-}
 }
 
 function closeFullscreen() {
   if (document.exitFullscreen) {
     document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) { /* Safari */
+  } else if (document.webkitExitFullscreen) {
+    /* Safari */
     document.webkitExitFullscreen();
-  } else if (document.msExitFullscreen) { /* IE11 */
+  } else if (document.msExitFullscreen) {
+    /* IE11 */
     document.msExitFullscreen();
   }
 }
@@ -150,25 +166,35 @@ document
     });
   });
 
-  function getMousePosition(canvas, event) {
-    let rect = canvas.getBoundingClientRect();
-    let x = event.clientX - rect.left;
-    let y = event.clientY - rect.top;
-    console.log("Coordinate x: " + x, 
-                "Coordinate y: " + y);
+function getMousePosition(canvas, event) {
+  let rect = canvas.getBoundingClientRect();
+  let x = event.clientX - rect.left;
+  let y = event.clientY - rect.top;
+  let cwidth = canvas.width;
+  let cheight = canvas.width;
+  let clientWidth = 1920;
+  let clientHeight = 1080;
+  let calculatedx = ((x / cwidth) * clientWidth).toFixed(0);
+  let calculatedy = ((y / cheight) * clientHeight).toFixed(0);
+
+  console.log("Coordinate x: " + x, "Coordinate y: " + y);
+  console.log("Coordinate cx: " + calculatedx, "Coordinate cy: " + calculatedy);
+  socket.emit("command", {
+    id: c.id,
+    cmd: `click ${calculatedx} ${calculatedy}`,
+  });
 }
 
-  
-c.addEventListener("mousedown", function(e)
-{
-    getMousePosition(c, e);
+c.addEventListener("mousedown", function (e) {
+  getMousePosition(c, e);
 });
 
 socket.emit("command", {
   id: c.id,
   cmd: "live",
 });
-socket.emit("command", { // Version >1.4
+socket.emit("command", {
+  // Version >1.4
   id: c.id,
   cmd: "livestart",
 });
@@ -196,13 +222,13 @@ setInterval(() => {
 }, 1000);
 
 socket.on("screenshotResult", (msg) => {
-  if(msg.id == c.id){
-  img.onload = function () {
-    ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
-  };
-  img.src = "data:image/jpeg;base64," + msg.response;
+  if (msg.id == c.id) {
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
+    };
+    img.src = "data:image/jpeg;base64," + msg.response;
 
-  fps += 1;
+    fps += 1;
   }
   // document.getElementById("liveCam").src =
   //   "data:image/jpg;base64," + msg.response;

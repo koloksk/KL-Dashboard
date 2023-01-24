@@ -53,9 +53,9 @@ function shutdown(element){
 
 
 function removeclient(element){
-  const clientname = element
+  const nearcomputercard = element
   .closest(".computer-card")
-  .getAttribute("clientname"); //get button computer card
+  const clientname = nearcomputercard.getAttribute("clientname"); //get button computer card
   
   socket.emit("delete", {
     clientname: clientname
@@ -72,6 +72,8 @@ function removeclient(element){
     },
     onClick: function(){} // Callback after click
   }).showToast();
+  nearcomputercard.remove();
+
 }
 
 function showoptions(element){

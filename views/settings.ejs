@@ -13,7 +13,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <%- include('./models/scripts') %>
-
   </head>
 
   <body>
@@ -22,15 +21,24 @@
       <div class="main-content">
         <h1>Ustawienia</h1>
 
-        <div>
-          <form action="" method="post">
+        <form action="" method="post">
+          <div class="settings-card">
+            <span>Hasło do panelu:</span>
+            <input type="password" name="password" id=""/>
+            <br>
             <span>Częstotliwość tworzenia screenshotów VNC:</span>
-            <input type="number" name="" id="" value="20" step="10">
-            <span></span>
-            <input type="submit" value="Zapisz">
-          </form>
-        </div>
+            <input type="number" name="vncdelay" id="" value="<%= settings['vnc-delay']%>" step="10" />
+            <br>
+            <span>Najnowsza wersja emmet client:</span>
+            <input type="text" name="version" value="<%= settings['version']%>" id=""/>
+            <br>
+            <input type="submit" value="Zapisz" />
+
+          </div>
+
+        </form>
       </div>
     </div>
+    <script src="./js/settings.js"></script>
   </body>
 </html>

