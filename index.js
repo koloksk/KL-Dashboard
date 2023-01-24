@@ -161,7 +161,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("screenshotResult", async (msg) => {
-    fps += 1;
 
     io.emit("screenshotResult", {
       id: socket.id,
