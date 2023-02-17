@@ -6,17 +6,47 @@ const connection_quality_icon = document.querySelector(".fa-signal");
 const console_button = document.querySelector("#console");
 const console_button_icon = document.querySelector(".fa-terminal");
 
+const mouse_button = document.querySelector("#mouse");
+const mouse_button_icon = document.querySelector(".fa-mouse-pointer");
+
 const input = document.querySelector("#input");
 const output = document.querySelector("#output");
 const c = document.querySelector(".c");
 const fps_counter = document.querySelector("#fps-counter");
-const fullscrean_button = document.querySelector("#maximize");
+const fullscreen_button = document.querySelector("#maximize");
 
 var last_x = 0;
+var clickable = false;
+c.src = "/mjpeg/"+c.id;
+
+// var ctx = c.getContext("2d");
+// ctx.canvas.width = window.innerWidth;
+// ctx.canvas.height = window.innerHeight;
+// var img = new Image();
+// img.onload = function () {
+//   ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
+// };
+// img.src = "/mjpeg/" + c.id;
+
+// fps += 1;
+
 
 $(function () {
   $(".options-bar").draggable({ containment: "window" });
   $(".console").draggable({ containment: "window" });
+});
+
+
+
+document.addEventListener("keyup", (e) => {
+  if (clickable) {
+    socket.emit("command", {
+      id: c.id,
+      cmd: "press "+e.key,
+    });
+  }
+
+
 });
 // When the user presses Enter in the input element,
 // execute the command and display the result in the output element
@@ -76,7 +106,18 @@ console_button.addEventListener("click", async (e) => {
     }
   }
 });
+mouse_button.addEventListener("click", async (e) => {
 
+    if (!clickable) {
+      mouse_button_icon.style.color = "blue";
+      clickable = true;
+    } else {
+      mouse_button_icon.style.color = "white";
+      clickable = false;
+
+    }
+  
+});
 connection_quality.addEventListener("click", async (e) => {
   if (fps_counter) {
     if (fps_counter.style.display == "none") {
@@ -86,7 +127,7 @@ connection_quality.addEventListener("click", async (e) => {
     }
   }
 });
-fullscrean_button.addEventListener("click", async (e) => {
+fullscreen_button.addEventListener("click", async (e) => {
   var elem = document.body; // Make the body go full screen.
   requestFullScreen(elem);
 });
@@ -166,19 +207,19 @@ document
     });
   });
 
-function getMousePosition(canvas, event) {
-  let rect = canvas.getBoundingClientRect();
+function getMousePosition(image, event) {
+  let rect = image.getBoundingClientRect();
   let x = event.clientX - rect.left;
   let y = event.clientY - rect.top;
-  let cwidth = canvas.width;
-  let cheight = canvas.width;
-  let clientWidth = 1920;
-  let clientHeight = 1080;
+  let cwidth = image.width;
+  let cheight = image.height;
+  let clientWidth = parseInt(width);
+  let clientHeight = parseInt(height);
   let calculatedx = ((x / cwidth) * clientWidth).toFixed(0);
   let calculatedy = ((y / cheight) * clientHeight).toFixed(0);
 
-  console.log("Coordinate x: " + x, "Coordinate y: " + y);
-  console.log("Coordinate cx: " + calculatedx, "Coordinate cy: " + calculatedy);
+  // console.log("Coordinate x: " + x, "Coordinate y: " + y);
+  // console.log("Coordinate cx: " + calculatedx, "Coordinate cy: " + calculatedy);
   socket.emit("command", {
     id: c.id,
     cmd: `click ${calculatedx} ${calculatedy}`,
@@ -186,7 +227,8 @@ function getMousePosition(canvas, event) {
 }
 
 c.addEventListener("mousedown", function (e) {
-  getMousePosition(c, e);
+  if(clickable)
+    getMousePosition(c, e);
 });
 
 socket.emit("command", {
@@ -199,37 +241,28 @@ socket.emit("command", {
   cmd: "livestart",
 });
 let fps = 0;
-var ctx = c.getContext("2d");
-ctx.canvas.width = window.innerWidth;
-ctx.canvas.height = window.innerHeight;
-var img = new Image();
+
 
 // img.onload = function () {
 //   ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
 // };
-
-setInterval(() => {
-  document.getElementById("fps-counter").innerHTML = `${fps} FPS`;
+socket.on("framecount", (data) => {
+if(data.id == c.id){
+  document.getElementById("fps-counter").innerHTML = `${data.fps} FPS`;
   //console.log(fps);
-  if (fps >= 4) {
+  if (data.fps >= 4) {
     connection_quality_icon.style.color = "green";
-  } else if (fps == 3) {
+  } else if (data.fps == 3) {
     connection_quality_icon.style.color = "yellow";
   } else {
     connection_quality_icon.style.color = "red";
   }
-  fps = 0;
-}, 1000);
+}
+});
 
-socket.on("screenshotResult", (msg) => {
-  if (msg.id == c.id) {
-    img.onload = function () {
-      ctx.drawImage(img, 0, 0, window.innerWidth, window.innerHeight);
-    };
-    img.src = "data:image/jpeg;base64," + msg.response;
 
-    fps += 1;
-  }
+
+  
   // document.getElementById("liveCam").src =
   //   "data:image/jpg;base64," + msg.response;
-});
+

@@ -2,6 +2,7 @@ class client {
   constructor(name, status = false) {
     this.name = name;
     this.status = status;
+    this.lastseen = '';
   }
 }
 const clients = new Map();
@@ -25,6 +26,15 @@ function getClientByName(name) {
   if(hasClient(name))
     return clients.get(name);
 }
+function getClientById(id) {
+  for (let [name, client] of clients) {
+    if (client.id === id) {
+      return client;
+    }
+  }
+  return null;
+}
+
 function hasClient(name) {
   return clients.has(name);
 }
@@ -41,5 +51,6 @@ module.exports = {
   getClientByName,
   hasClient,
   getOfflineClients,
-  getOnlineClients
+  getOnlineClients,
+  getClientById
 };

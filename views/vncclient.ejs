@@ -26,11 +26,13 @@
   <body>
     <div id="fps-counter" style="display: none">0 FPS</div>
     <div class="view">
-      <img
+      <img alt="streaming" class="c" id="<%= clientid %>"/>
+
+      <!-- <img
         id="liveCam"
         src="https://media.tenor.com/UnFx-k_lSckAAAAM/amalie-steiness.gif"
-      />
-      <canvas class="c" id="<%= clientid %>"></canvas>
+      /> -->
+      <!-- <canvas class="c" id="<%= clientid %>"></canvas> -->
       <%- include('./models/console') %>
       <div class="options-bar">
         <div class="icon hide" id="signal">
@@ -42,6 +44,7 @@
         <div class="icon hide" id="mouse">
           <i style="color: white" class="fa fa-mouse-pointer"></i>
         </div>
+
         <div class="icon hide" id="console">
           <i style="color: white" class="fa fa-terminal"></i>
         </div>
@@ -51,11 +54,18 @@
         <div class="icon" id="button-for-hiding-elements">
           <i style="color: white" class="fa fa-ellipsis-v"></i>
         </div>
+        <div class="drag hide" >
+          <svg style="color: gray" width="40" height="40" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="4.5" cy="2.5" r=".6" fill="currentColor" /> <circle cx="4.5" cy="4.5" r=".6" fill="currentColor" /> <circle cx="4.5" cy="6.499" r=".6" fill="currentColor" /> <circle cx="4.5" cy="8.499" r=".6" fill="currentColor" /> <circle cx="4.5" cy="10.498" r=".6" fill="currentColor" /> <circle cx="4.5" cy="12.498" r=".6" fill="currentColor" /> <circle cx="6.5" cy="2.5" r=".6" fill="currentColor" /> <circle cx="6.5" cy="4.5" r=".6" fill="currentColor" /> <circle cx="6.5" cy="6.499" r=".6" fill="currentColor" /> <circle cx="6.5" cy="8.499" r=".6" fill="currentColor" /> <circle cx="6.5" cy="10.498" r=".6" fill="currentColor" /> <circle cx="6.5" cy="12.498" r=".6" fill="currentColor" /> <circle cx="8.499" cy="2.5" r=".6" fill="currentColor" /> <circle cx="8.499" cy="4.5" r=".6" fill="currentColor" /> <circle cx="8.499" cy="6.499" r=".6" fill="currentColor" /> <circle cx="8.499" cy="8.499" r=".6" fill="currentColor" /> <circle cx="8.499" cy="10.498" r=".6" fill="currentColor" /> <circle cx="8.499" cy="12.498" r=".6" fill="currentColor" /> <circle cx="10.499" cy="2.5" r=".6" fill="currentColor" /> <circle cx="10.499" cy="4.5" r=".6" fill="currentColor" /> <circle cx="10.499" cy="6.499" r=".6" fill="currentColor" /> <circle cx="10.499" cy="8.499" r=".6" fill="currentColor" /> <circle cx="10.499" cy="10.498" r=".6" fill="currentColor" /> <circle cx="10.499" cy="12.498" r=".6" fill="currentColor" /> </svg>
+        </div>
       </div>
     </div>
+    <script>
+      var width = '<%= width%>';
+      var height = '<%= height%>';
 
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
-    <script src="/js/socketInit.js"></script>>
+    <script src="/js/socketInit.js"></script>
     <script src="/js/vncclient.js"></script>
 
   </body>

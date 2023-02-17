@@ -24,13 +24,13 @@
         <form action="" method="post">
           <div class="settings-card">
             <span>Hasło do panelu:</span>
-            <input type="password" name="password" id=""/>
+            <input type="password" name="password"/>
             <br>
             <span>Częstotliwość tworzenia screenshotów VNC:</span>
-            <input type="number" name="vncdelay" id="" value="<%= settings['vnc-delay']%>" step="10" />
+            <input type="number" name="vncdelay" value="<%= settings['vnc-delay']%>" step="10" />
             <br>
             <span>Najnowsza wersja emmet client:</span>
-            <input type="text" name="version" value="<%= settings['version']%>" id=""/>
+            <input type="text" name="version" value="<%= settings['version']%>"/>
             <br>
             <input type="submit" value="Zapisz" />
 

@@ -65,7 +65,6 @@ html {
   overflow: hidden;
   border-radius: 20px;
   box-shadow: 0 0 20px 8px #d0d0d0;
-  cursor: pointer;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
